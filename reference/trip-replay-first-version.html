@@ -1,0 +1,486 @@
+<title>TrackGov Trip Replay</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<style>
+/* Layout: the OG TrackGov night palette; one notched "track card" holds the trip like a race-weekend panel, list of trips below. */
+:root{
+  --ink:#050b14;          /* page ground (OG) */
+  --navy:#0a1628;         /* card surface (OG) */
+  --navy2:#10223d;        /* raised surface (OG) */
+  --teal:#16b8a6;         /* accent + track glow (OG) */
+  --teal-deep:#0b4440;    /* track walls */
+  --blue:#3b82f6;         /* secondary data (OG) */
+  --text:#e8eef7;
+  --muted:#8fa3bf;
+  --line:rgba(232,238,247,.12);
+  --alert:#f26363;
+  --display:"Inter Tight","Helvetica Neue",Inter,Arial,sans-serif;
+  --num:"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--text);font-family:var(--display);line-height:1.5;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(60vw 60vw at -10% -10%,rgba(22,184,166,.12),transparent 60%),radial-gradient(50vw 50vw at 110% 30%,rgba(59,130,246,.10),transparent 60%);background-attachment:fixed}
+.wrap{max-width:1240px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 56px;display:flex;flex-direction:column;gap:28px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:4px}
+.label{font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:8px;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border:1px dashed var(--line);border-radius:99px;padding:5px 12px;white-space:nowrap}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal)}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.03em;font-size:1.2rem}
+.brand b{color:var(--teal);font-weight:800}
+
+/* intro */
+.intro{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+.intro h1{margin:6px 0 0;font-size:clamp(2.1rem,5.4vw,4rem);line-height:.98;letter-spacing:-.045em;font-weight:800;text-wrap:balance}
+.intro h1 span{color:var(--teal)}
+.intro p{margin:0;max-width:44ch;color:var(--muted)}
+.eyebrow{font-size:.74rem;letter-spacing:.22em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0}
+
+/* the track card */
+.cardwrap{position:relative}
+.frame{--cut:44px;background:linear-gradient(135deg,rgba(22,184,166,.9),rgba(22,184,166,.35) 45%,rgba(59,130,246,.5));padding:1px;
+  clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut))}
+.card{background:linear-gradient(180deg,var(--navy),#071120);clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut));
+  display:grid;grid-template-columns:76px minmax(0,1fr) 300px;grid-template-areas:"side stats info" "side stage info" "player player player";min-height:560px}
+.side{grid-area:side;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:56px 0 24px;border-right:1px solid var(--line)}
+.plate{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:800;font-size:2.7rem;letter-spacing:-.03em;line-height:1;white-space:nowrap}
+.agency{writing-mode:vertical-rl;transform:rotate(180deg);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);font-weight:700;white-space:nowrap}
+.stats{grid-area:stats;display:flex;flex-wrap:wrap;gap:20px 40px;padding:26px 28px 0}
+.stat{display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat .v{font-family:var(--num);font-weight:600;font-size:clamp(2.2rem,4.4vw,3.4rem);line-height:1;color:var(--teal);font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap}
+.stat .v small{font-size:.42em;color:var(--text);margin-left:4px;letter-spacing:.04em}
+.stat.date .v{color:var(--text)}
+.stat.date .v small{display:block;margin:0;font-size:.62em;color:var(--muted)}
+.stage{grid-area:stage;position:relative;min-width:0}
+#track{display:block;width:100%;height:auto}
+.info{grid-area:info;padding:26px 24px 18px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:18px;min-width:0}
+.info p{margin:0;color:var(--muted);font-size:.9rem}
+.info h2{margin:0;font-size:1.05rem;letter-spacing:-.01em}
+.flag{display:none;gap:10px;align-items:flex-start;background:rgba(242,99,99,.1);border:1px solid rgba(242,99,99,.45);color:#ffd5d5;border-radius:10px;padding:10px 12px;font-size:.85rem;line-height:1.35}
+.flag.on{display:flex}
+.flag b{color:var(--alert)}
+.sched{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.sched li{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line);transition:opacity .3s,color .3s}
+.sched .n{font-family:var(--num);font-weight:700;font-size:1.25rem;color:var(--muted);letter-spacing:.02em}
+.sched .p{font-weight:600;font-size:.92rem;overflow-wrap:anywhere}
+.sched .p em{display:block;font-style:normal;font-weight:500;font-size:.74rem;color:var(--muted)}
+.sched .t{font-family:var(--num);font-weight:600;font-size:1.2rem;font-variant-numeric:tabular-nums}
+.sched li.now .n,.sched li.now .t{color:var(--teal)}
+.sched li.now{color:var(--text)}
+.sched li.todo{opacity:.5}
+.sched li.off .p em{color:var(--alert)}
+.sched li.off .n{color:var(--alert)}
+.note{font-size:.72rem;color:var(--muted);margin-top:auto}
+
+/* player */
+.player{grid-area:player;border-top:1px solid var(--line);padding:16px 28px 22px 28px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px 20px;align-items:center}
+.ctrl{display:flex;gap:8px;align-items:center}
+.play{width:46px;height:46px;border-radius:50%;border:0;background:var(--teal);color:var(--ink);display:grid;place-items:center;box-shadow:0 0 24px rgba(22,184,166,.45)}
+.rate{border:1px solid var(--line);background:transparent;border-radius:99px;padding:6px 11px;font-family:var(--num);font-weight:600;font-size:.95rem;color:var(--muted)}
+.rate[aria-pressed="true"]{border-color:var(--teal);color:var(--teal)}
+.readout{display:flex;gap:26px;flex-wrap:wrap;font-family:var(--num);font-weight:600;font-size:1.35rem;font-variant-numeric:tabular-nums}
+.readout span small{font-family:var(--display);font-size:.62rem;letter-spacing:.16em;color:var(--muted);display:block;font-weight:600;text-transform:uppercase}
+.profile{grid-column:1/-1;min-width:0}
+#prof{display:block;width:100%;height:104px;touch-action:none;cursor:ew-resize}
+
+/* prev / next, F1-style tabs on the cut corner */
+.navbtns{position:absolute;right:0;bottom:56px;display:flex;flex-direction:column;gap:8px;transform:translateX(50%)}
+.navbtns button{width:46px;height:46px;border-radius:10px;border:1px solid var(--teal);background:var(--ink);color:var(--teal);display:grid;place-items:center}
+.navbtns button:hover{background:var(--teal);color:var(--ink)}
+
+/* trip list */
+.list{display:flex;flex-direction:column;gap:14px}
+.listhead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.listhead h2{margin:0;font-size:clamp(1.8rem,4vw,2.8rem);letter-spacing:-.04em;line-height:1;font-weight:800}
+.listhead h2 span{display:block;font-weight:500;color:var(--muted)}
+.sum{display:flex;gap:32px}
+.sum div{display:flex;flex-direction:column}
+.sum b{font-family:var(--num);font-size:2.4rem;line-height:1;font-weight:600}
+.sum b.r{color:var(--alert)}
+.tablebox{overflow-x:auto;border-top:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:760px}
+th{text-align:left;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:12px 10px}
+td{padding:12px 10px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+td.num{font-family:var(--num);font-weight:600;font-size:1.15rem}
+tbody tr{cursor:pointer;transition:background .2s}
+tbody tr:hover{background:rgba(22,184,166,.06)}
+tbody tr.active{background:rgba(22,184,166,.12)}
+tbody tr.active td:first-child{box-shadow:inset 3px 0 0 var(--teal)}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:.74rem;font-weight:600;border-radius:99px;padding:3px 10px;white-space:nowrap;background:rgba(22,184,166,.12);color:var(--teal)}
+.st.off{background:rgba(242,99,99,.14);color:var(--alert)}
+.sub{color:var(--muted);font-size:.78rem}
+footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:.75rem;border-top:1px solid var(--line);padding-top:16px}
+
+@media (max-width:960px){
+  .card{grid-template-columns:minmax(0,1fr);grid-template-areas:"side" "stats" "stage" "player" "info";min-height:0}
+  .side{flex-direction:row;justify-content:flex-start;padding:52px 20px 0;border-right:0;gap:12px;align-items:baseline;flex-wrap:wrap}
+  .plate,.agency{writing-mode:horizontal-tb;transform:none}
+  .plate{font-size:2rem}
+  .stats{padding:14px 20px 0;gap:14px 28px}
+  .info{border-left:0;border-top:1px solid var(--line);padding:20px 20px 52px}
+  .player{padding:14px 20px 18px;grid-template-columns:minmax(0,1fr)}
+  .readout{gap:14px 22px;font-size:1.2rem}
+  .pill{white-space:normal}
+  .navbtns{position:static;transform:none;flex-direction:row;justify-content:flex-end;margin-top:10px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@keyframes pulse{0%{r:8;opacity:.55}100%{r:22;opacity:0}}
+.halo{animation:pulse 1.6s ease-out infinite}
+</style>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2l11 4v9c0 7-5 12-11 15C10 27 5 22 5 15V6z" fill="none" stroke="#16b8a6" stroke-width="2"/><path d="M16 9a5 5 0 0 0-5 5c0 4 5 9 5 9s5-5 5-9a5 5 0 0 0-5-5zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4z" fill="#16b8a6"/></svg>
+      <span>Track<b>Gov</b></span>
+    </div>
+    <span class="pill"><i></i>Data simulasi · rute jalan asli Yogyakarta</span>
+  </header>
+
+  <section class="intro" aria-labelledby="h1">
+    <div>
+      <p class="eyebrow">03 — Riwayat Perjalanan</p>
+      <h1 id="h1">Setiap perjalanan,<br><span>terekam.</span></h1>
+    </div>
+    <p>Putar ulang rute kendaraan dinas hari ini. Garis mengikuti jalan sebenarnya di Yogyakarta; titik bernomor adalah tempat kendaraan berhenti.</p>
+  </section>
+
+  <div class="cardwrap">
+    <div class="frame">
+      <section class="card" id="card" aria-label="Detail perjalanan">
+        <div class="side"><span class="plate" id="plate">AB 1012 XY</span><span class="agency" id="agency">Setda</span></div>
+
+        <div class="stats">
+          <div class="stat date"><span class="label">Tanggal</span><span class="v" id="sDate">28<small>OKT</small></span></div>
+          <div class="stat"><span class="label">Jarak</span><span class="v" id="sDist">0<small>KM</small></span></div>
+          <div class="stat"><span class="label">Waktu bergerak</span><span class="v" id="sMove">0<small>MNT</small></span></div>
+          <div class="stat"><span class="label">Kec. rata-rata</span><span class="v" id="sAvg">0<small>KM/J</small></span></div>
+          <div class="stat"><span class="label">Berhenti</span><span class="v" id="sStops">0</span></div>
+        </div>
+
+        <div class="stage"><svg id="track" role="img" aria-label="Rute perjalanan"></svg></div>
+
+        <aside class="info">
+          <div>
+            <span class="label">Kendaraan</span>
+            <h2 id="vName">Toyota Innova</h2>
+            <p id="vMeta">Pengemudi</p>
+          </div>
+          <div class="flag" id="flag" role="status"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 18H2z" fill="none" stroke="#f26363" stroke-width="2"/><path d="M12 10v5M12 18v.5" stroke="#f26363" stroke-width="2" stroke-linecap="round"/></svg><span id="flagText"></span></div>
+          <div>
+            <span class="label">Jadwal perjalanan</span>
+            <ol class="sched" id="sched"></ol>
+          </div>
+          <p class="note" id="fuel"></p>
+        </aside>
+
+        <div class="player">
+          <div class="ctrl">
+            <button class="play" id="play" aria-label="Putar ulang"><svg id="playIcon" width="18" height="18" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg></button>
+            <button class="rate" data-r="30" aria-pressed="false">30×</button>
+            <button class="rate" data-r="90" aria-pressed="true">90×</button>
+            <button class="rate" data-r="300" aria-pressed="false">300×</button>
+          </div>
+          <div class="readout" aria-live="off">
+            <span><small>Jam</small><b id="rClock">07:00</b></span>
+            <span><small>Kecepatan</small><b id="rSpeed">0 km/j</b></span>
+            <span><small>Ditempuh</small><b id="rDist">0,0 km</b></span>
+            <span><small>Status</small><b id="rState">Siap</b></span>
+          </div>
+          <div class="profile"><svg id="prof" aria-label="Grafik kecepatan sepanjang perjalanan. Klik atau geser untuk melompat ke waktu tertentu."></svg></div>
+        </div>
+      </section>
+    </div>
+    <div class="navbtns">
+      <button id="prev" aria-label="Kendaraan sebelumnya"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+      <button id="next" aria-label="Kendaraan berikutnya"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></button>
+    </div>
+  </div>
+
+  <section class="list" aria-labelledby="h2l">
+    <div class="listhead">
+      <h2 id="h2l">Perjalanan hari ini<span>20 kendaraan dinas</span></h2>
+      <div class="sum">
+        <div><span class="label">Total jarak</span><b id="tKm">0</b></div>
+        <div><span class="label">Henti non-resmi</span><b class="r" id="tOff">0</b></div>
+      </div>
+    </div>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>No</th><th>Kendaraan</th><th>Instansi</th><th>Rute</th><th>Berangkat</th><th>Jarak</th><th>Durasi</th><th>Status</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer><span>TrackGov · Demo untuk Expo PABW</span><span>Rute © kontributor OpenStreetMap, dihitung dengan OSRM. Posisi dan waktu adalah simulasi.</span></footer>
+</div>
+<script>
+const RAW=`1|21|8,50,55,55,55,55,55,56,55,56,55,55,64,85,87,86,85,85,85,55,25,25,25,25,85,85,85,85,85,23,89,65,65,68,32,63,65,65,55,56,53,33,32,54,56,54,56,55,56,54,42,32,32,32,8|964,6680 990,6682 1003,6635 1014,6443 999,6342 1005,6266 1039,6163 1065,5748 1179,5754 1217,5881 1255,5931 1356,6006 1485,6070 5040,6233 5078,6205 5101,6223 5219,6236 6478,6299 7039,6347 7766,6152 8087,5412 8445,5561 8553,5606 8722,5659 8855,5751 8688,5910 7054,6354 6465,6306 5550,6262 5147,6248 5097,6257 5055,6241 2952,6136 1714,6088 1716,6075 1710,6625 1722,6708 1707,6860 1702,7499 1319,7435 1256,7525 1161,7483 1145,7453 1145,7398 1169,7334 1207,7313 1202,7238 1171,7164 1048,6981 1037,6923 1018,6902 1029,6856 961,6826 985,6764 990,6682 964,6680
+2|15,27|25,25,65,65,65,24,65,31,36,40,15,15,15,15,15,15,15,14,40,40,40,41,55,65,15,15,15,15,15,15,15,25,26,55,54,55,55,55,55,52,60,64,25,25|1626,8879 1627,8866 1687,8871 1691,8805 1702,7490 2382,7601 2391,7435 2830,7616 2915,7338 2944,7323 3238,7428 3242,7418 3206,7405 3217,7370 3193,7362 3192,7363 3181,7395 3122,7374 3118,7385 3301,7451 3370,7506 3487,7536 3538,7592 3425,7860 3054,7709 3045,7740 2965,7715 2947,7779 2922,7831 3008,7864 3004,7875 2774,7805 2793,7740 2389,7622 2374,7953 2337,8068 2295,8354 2211,8615 2240,8750 2214,8872 1702,8785 1690,9360 1687,8871 1627,8866 1626,8879
+3|8,23|25,25,53,51,32,25,65,15,15,15,15,15,15,67,25,25,15,15,15,15,15,15,15,15,15,15,15,15,15,25,25,73,25,25|1626,8879 1627,8866 1687,8871 1699,8776 1770,8783 1707,8782 1695,8814 1680,10165 1730,10166 1752,10167 1755,10179 1750,10191 1708,10193 1680,10223 1662,12752 1595,12761 1380,12713 1399,12868 1386,13032 1391,13144 1370,13155 1354,13195 1332,13196 1350,13195 1354,13195 1376,13148 1408,13144 1389,12964 1399,12868 1380,12713 1595,12761 1653,12752 1687,8871 1627,8866 1626,8879
+4|25|26,39,54,56,55,55,42,32,65,65,65,67,65,65,65,65,65,65,65,50,41,48,65,65,26,25,25,25,25,57,64,65,47,50,65,65,65,65,65,65,65,65,65,65,65,32,41,56,55,56,52,53,40,40,25,40,26|1321,6060 1308,6059 1321,5995 1233,5958 1231,5922 1173,5762 1065,5753 975,5535 986,5388 343,5277 -1193,4954 -1273,5515 -1309,5611 -1794,5588 -2749,5419 -3432,5326 -3855,5082 -4172,4690 -4934,4309 -6131,4027 -7830,3460 -7872,3439 -8034,3308 -8595,3081 -8755,2910 -8779,2919 -8784,2926 -8821,3042 -8655,3127 -8614,3066 -8654,3012 -8586,3077 -8028,3303 -7830,3454 -6131,4027 -4934,4309 -4172,4690 -3855,5082 -3432,5326 -2749,5419 -1794,5588 -1312,5605 -1271,5483 -1191,4945 343,5277 986,5388 975,5535 1065,5748 1179,5754 1217,5881 1267,5942 1264,5962 1233,5958 1229,5968 1192,6151 1294,6165 1308,6059 1321,6060
+5|24|32,55,55,55,55,56,55,69,85,84,85,84,85,86,86,85,62,40,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,40,40,41,85,86,86,85,85,80,85,75,55,56,55,55,55,55,32|104,9001 39,9230 1187,9370 1230,9483 1270,9518 1405,9479 1468,9508 1688,9511 1655,13240 1656,14713 2697,16629 2978,16883 3628,17431 4202,17946 4263,18021 4311,18148 4476,19032 4492,19170 4489,19332 4606,19321 4704,19335 4759,19351 4763,19377 4796,19375 4800,19244 4803,19375 4763,19377 4759,19351 4704,19335 4595,19322 4621,19166 4592,19048 4592,18938 4629,18882 4596,18838 4593,18764 4529,18761 4459,18728 4418,18725 4311,18148 4263,18021 4202,17946 2973,16890 2689,16632 1646,14710 1648,13034 1680,9511 1468,9508 1405,9479 1270,9518 1230,9483 1187,9370 39,9230 104,9001
+6|13,29|55,40,55,55,55,55,43,46,55,56,25,25,24,25,25,25,55,85,86,85,86,85,41,40,40,40,40,40,40,40,40,40,40,40,55,55,55,65,43,55,55,55,55,40,55|-72,9217 -209,9200 -215,9520 -756,9439 -898,9305 -1114,9304 -1286,9204 -1790,9074 -2922,8985 -3181,9007 -3206,9011 -3242,9274 -3307,9263 -3310,9254 -3293,9130 -3396,9137 -3396,9066 -3645,9183 -3756,10376 -3746,10469 -3682,10569 -3561,10632 -2862,10785 -2836,10768 -2779,10390 -2754,10131 -2754,10043 -2781,10032 -2779,9954 -2762,9883 -2738,9767 -2729,9482 -2696,9353 -2640,9238 -2518,9017 -2356,9030 -1730,8669 -1722,8667 -1790,9074 -1286,9204 -1114,9304 -898,9305 -756,9439 -215,9520 -209,9200 -72,9217
+7|41|8,33,32,40,55,52,40,32,47,54,55,55,35,54,55,55,55,55,55,55,54,32,32,60,56,57,55,54,55,54,65,67,25,25,15,15,15,15,15,15,15,15,15,15,15,15,15,25,25,70,31,55,56,53,33,32,54,56,54,56,55,56,54,42,32,32,32,8|964,6680 990,6682 987,6617 736,6585 723,6759 932,6766 956,6784 971,6827 1028,6847 1026,6892 1052,6973 1189,7184 1218,7313 1311,7332 1315,7401 1293,7483 1252,7526 1175,7505 1145,7622 1156,7717 1199,7846 1292,7864 1242,8035 1282,8188 1304,8208 1368,8217 1388,8238 1383,8690 1421,8749 1504,8812 1691,8797 1695,8814 1662,12752 1595,12761 1380,12713 1399,12868 1386,13032 1391,13144 1370,13155 1354,13195 1332,13196 1350,13195 1354,13195 1376,13148 1408,13144 1389,12964 1399,12868 1380,12713 1595,12761 1653,12752 1702,7534 1679,7496 1319,7435 1256,7525 1161,7483 1145,7453 1145,7398 1169,7334 1207,7313 1202,7238 1171,7164 1048,6981 1037,6923 1018,6902 1029,6856 961,6826 985,6764 990,6682 964,6680
+8|28|25,25,53,51,32,25,65,55,56,55,55,55,55,54,55,55,55,55,55,55,55,45,40,44,55,55,25,25,26,25,55,55,56,26,50,55,65,43,55,55,55,55,50,53,55,54,55,55,55,55,56,55,65,25,25|1626,8879 1627,8866 1687,8871 1699,8776 1770,8783 1707,8782 1695,8814 1688,9511 1468,9508 1405,9479 1270,9518 1230,9483 1187,9370 57,9228 39,9230 30,9254 -45,9540 -192,9527 -756,9439 -898,9305 -1114,9304 -1286,9204 -1685,9096 -1808,9072 -2592,9011 -2546,8775 -2522,8385 -2579,8373 -2557,8325 -2553,8316 -2521,8331 -2546,8775 -2583,8927 -2590,8989 -2579,9006 -2356,9030 -1722,8667 -1790,9074 -1286,9204 -1114,9304 -898,9305 -756,9439 -192,9527 -47,9533 30,9254 39,9230 57,9228 1187,9370 1230,9483 1270,9518 1405,9479 1468,9508 1680,9511 1687,8871 1627,8866 1626,8879
+9|57|26,39,54,56,55,55,42,32,65,65,65,67,65,65,65,65,65,65,65,50,40,64,66,65,65,66,65,66,66,64,65,65,65,65,65,65,65,65,65,65,65,65,64,65,65,65,65,67,63,55,55,55,55,56,55,25,24,25,25,25,25,55,55,55,55,55,55,55,63,67,65,65,65,65,64,65,65,65,65,65,65,65,65,65,65,65,65,64,66,66,65,66,65,65,66,64,40,41,50,65,65,65,65,65,65,65,65,65,65,65,32,41,56,55,56,52,53,40,40,25,40,26|1321,6060 1308,6059 1321,5995 1233,5958 1231,5922 1173,5762 1065,5753 975,5535 986,5388 343,5277 -1193,4954 -1273,5515 -1309,5611 -1794,5588 -2749,5419 -3432,5326 -3855,5082 -4172,4690 -4934,4309 -6131,4027 -7830,3460 -7958,3368 -7996,3501 -8000,3719 -8089,3914 -8182,4332 -8259,4429 -8308,4713 -8533,4683 -8623,4653 -8769,4629 -8886,4736 -8939,4749 -8992,4745 -10401,4541 -10779,4462 -10930,4960 -10979,5210 -12747,5051 -12813,5029 -12862,4979 -14081,3519 -14523,2999 -14555,2977 -16485,2048 -17597,1786 -18719,1542 -19979,1512 -20045,1524 -21400,2076 -21554,2250 -21693,2309 -21795,2558 -22124,2816 -22140,2910 -22184,3017 -22408,2944 -22405,2933 -22392,2866 -22237,2897 -22245,2936 -22163,2964 -22119,2810 -21957,2693 -21789,2550 -21730,2378 -21693,2309 -21554,2250 -21400,2076 -20045,1524 -19979,1512 -18719,1542 -17597,1786 -16485,2048 -14555,2977 -14523,2999 -14081,3519 -12862,4979 -12813,5029 -12747,5051 -10979,5210 -10930,4960 -10779,4462 -10401,4541 -8992,4745 -8939,4749 -8886,4736 -8769,4629 -8623,4653 -8533,4683 -8308,4713 -8259,4429 -8182,4332 -8089,3914 -8000,3719 -7996,3501 -7955,3361 -7865,3436 -7795,3467 -6131,4027 -4934,4309 -4172,4690 -3855,5082 -3432,5326 -2749,5419 -1794,5588 -1312,5605 -1271,5483 -1191,4945 343,5277 986,5388 975,5535 1065,5748 1179,5754 1217,5881 1267,5942 1264,5962 1233,5958 1229,5968 1192,6151 1294,6165 1308,6059 1321,6060
+10|21,33|32,32,53,55,55,55,65,65,64,66,67,33,65,85,87,86,85,85,85,55,25,25,25,25,85,85,85,85,85,23,89,65,15,15,15,15,15,15,65,85,89,80,81,90,65,65,68,32,63,65,65,55,55,55,55,55,55,55,55,55,53,32,32|104,9001 248,8436 263,8248 258,7993 272,7761 914,7799 1699,7924 1708,6846 1706,6722 1694,6705 1705,6694 1710,6625 1716,6075 5040,6233 5078,6205 5101,6223 5219,6236 6478,6299 7039,6347 7766,6152 8087,5412 8445,5561 8553,5606 8722,5659 8855,5751 8688,5910 7054,6354 6465,6306 5550,6262 5147,6248 5097,6257 5055,6241 4670,6222 4674,6149 4668,6119 4680,6110 4714,6134 4758,6140 4755,6217 5040,6233 5078,6205 5097,6215 5100,6238 5073,6254 5055,6241 2952,6136 1714,6088 1716,6075 1710,6625 1722,6708 1707,6860 1702,7499 1318,7435 1259,7524 1175,7505 1145,7622 1156,7717 1199,7846 914,7799 272,7761 258,7993 263,8248 248,8436 104,9001
+11|26|54,32,32,53,55,55,55,53,55,56,54,33,44,56,55,56,55,56,54,42,32,32,37,55,55,56,55,55,55,40,40,32,36,54,32,32,54|-72,9217 39,9230 240,8481 263,8248 258,7993 272,7761 914,7799 1167,7841 1183,7829 1144,7700 1139,7583 1167,7493 1142,7429 1166,7339 1208,7310 1202,7238 1171,7164 1048,6981 1037,6923 1018,6902 1029,6856 961,6826 985,6764 1003,6635 1014,6443 999,6342 1001,6316 1005,6266 1039,6163 1043,6045 660,6027 598,6568 364,6539 261,7936 263,8248 248,8436 39,9230 -72,9217
+12|21,43|8,33,32,40,55,52,40,31,48,54,55,55,35,54,41,24,62,65,15,15,15,15,15,14,15,15,15,25,25,60,61,57,39,40,40,40,20,55,64,15,15,15,15,15,15,25,63,31,55,56,53,33,32,54,56,54,56,55,56,54,42,32,32,32,8|964,6680 990,6682 987,6617 736,6585 723,6759 932,6766 956,6784 971,6827 1029,6848 1026,6892 1052,6973 1189,7184 1218,7313 1311,7332 1320,7426 2382,7601 2391,7435 2414,7441 3054,7709 3045,7740 2959,7717 2947,7779 2945,7789 2922,7828 2925,7839 3008,7864 3004,7875 2774,7805 2793,7740 2393,7624 2381,7609 1328,7437 1261,7539 1241,7605 1250,7624 1302,7651 1269,7838 1283,7862 1699,7924 1700,7851 1686,7851 1685,7903 1676,7905 1675,7800 1675,7670 1682,7611 1701,7613 1702,7534 1679,7496 1319,7435 1256,7525 1161,7483 1145,7453 1145,7398 1169,7334 1207,7313 1202,7238 1171,7164 1048,6981 1037,6923 1018,6902 1029,6856 961,6826 985,6764 990,6682 964,6680
+13|24,34|25,25,53,51,32,25,65,37,82,85,86,84,68,65,65,65,64,65,52,40,40,40,40,40,40,40,40,40,40,55,55,25,25,24,25,25,25,55,85,86,85,86,85,85,85,85,85,85,85,85,84,39,65,25,25|1626,8879 1627,8866 1687,8871 1699,8776 1770,8783 1707,8782 1695,8814 1674,11041 1665,11052 165,10997 -585,10930 -925,10865 -1204,10923 -1140,10847 -1087,10719 -1070,10214 -1706,10203 -1832,10172 -1970,10119 -2119,10087 -2394,10045 -2754,10043 -2781,10032 -2778,9947 -2762,9883 -2738,9767 -2733,9517 -2715,9420 -2680,9314 -2518,9017 -2922,8985 -3206,9011 -3242,9274 -3307,9263 -3310,9254 -3293,9130 -3396,9137 -3396,9066 -3645,9183 -3756,10376 -3746,10469 -3682,10569 -3584,10624 -2721,10819 -2340,11019 -2162,11068 -2036,11070 -1689,11025 -938,10858 -585,10922 185,10990 1641,11036 1665,11008 1687,8871 1627,8866 1626,8879
+14|25|26,39,54,53,51,52,54,55,62,40,40,40,40,40,40,40,40,40,43,39,15,15,15,15,15,15,15,14,40,40,40,42,55,63,55,65,65,64,66,67,32,55,55,25,25|1321,6060 1308,6059 1321,5995 1238,5964 1231,5948 1241,5933 1258,5932 1356,6006 1477,6069 2171,6097 2104,6242 2236,6537 2190,6787 2155,7134 2300,7182 2376,7235 2682,7361 2872,7476 2915,7338 2930,7324 3238,7428 3242,7418 3206,7405 3217,7370 3193,7362 3192,7363 3181,7395 3122,7374 3118,7385 3301,7451 3370,7506 3497,7541 3540,7596 3425,7860 2176,7345 1701,7229 1708,6846 1706,6722 1694,6705 1705,6694 1710,6625 1716,6088 1474,6076 1426,6054 1421,6068 1321,6060
+15|24|42,55,55,55,55,55,55,56,51,38,65,65,65,65,65,65,65,65,50,41,48,65,65,26,26,25,26,25,25,57,64,65,48,41,50,65,65,65,65,64,65,80,79,79,77,81,80,81,84,79,80,81,55,55,55,55,65,55,55,55,55,55,55,26,42|104,9001 -45,9540 -756,9439 -898,9305 -1114,9304 -1267,9211 -1441,9165 -1635,8532 -1690,8401 -1474,6933 -1484,6840 -1313,5611 -1794,5588 -2749,5419 -3450,5320 -3855,5082 -4172,4690 -4916,4317 -6131,4027 -7830,3460 -7872,3439 -8034,3308 -8583,3088 -8755,2910 -8779,2919 -8781,2921 -8821,3042 -8814,3051 -8655,3127 -8614,3066 -8654,3012 -8586,3077 -8028,3303 -7865,3436 -7795,3467 -6131,4027 -4946,4304 -4172,4690 -3855,5082 -3470,5311 -3432,5326 -2771,5416 -2794,5671 -2814,5732 -2846,5772 -2883,5797 -2952,5813 -3224,5798 -3290,5832 -3328,5885 -3581,6660 -3608,6959 -3628,7425 -3453,7423 -2477,7341 -2243,7305 -1530,7317 -1683,8406 -1441,9165 -1267,9211 -1114,9304 -898,9305 -756,9439 -60,9538 -42,9526 104,9001
+16|12,27|55,35,54,55,55,25,25,25,40,40,40,40,40,39,25,25,25,55,40,41,40,40,55,56,56,25,25,26,25,55,55,25,55,55,65,43,55,55,55,55,40,55|-72,9217 -209,9200 -151,6934 -362,6922 -405,6941 -916,6908 -911,6664 -1183,6629 -1153,6388 -1254,6363 -1230,6251 -1117,6277 -1124,6328 -1133,6386 -1153,6388 -1183,6629 -911,6664 -916,6908 -1464,6874 -1568,7620 -1781,7590 -1847,7592 -2481,7844 -2480,8141 -2511,8241 -2522,8385 -2579,8373 -2557,8325 -2553,8316 -2521,8331 -2546,8775 -2590,8989 -2564,9013 -2356,9030 -1722,8667 -1790,9074 -1286,9204 -1114,9304 -898,9305 -756,9439 -215,9520 -209,9200 -72,9217
+17|15|8,33,33,40,39,40,53,55,52,55,55,55,25,25,24,25,25,25,55,55,55,53,32,55,56,37,31,24,24,55,55,56,55,54,32,8|964,6680 990,6682 987,6617 -286,6456 -294,6543 -330,6564 -373,6928 -393,6939 -1464,6874 -1722,8667 -2356,9030 -2922,8985 -3206,9011 -3242,9274 -3309,9260 -3310,9254 -3293,9130 -3223,9138 -3206,9011 -2922,8985 -2356,9030 -1730,8669 -1474,6933 -1475,6867 -405,6941 -340,6918 286,6933 340,6904 472,6905 523,6890 568,6821 631,6770 723,6759 959,6761 986,6738 990,6682 964,6680
+18|16|25,25,53,51,32,25,67,25,25,15,15,15,15,15,15,15,15,15,15,15,15,15,25,25,73,25,25|1626,8879 1627,8866 1687,8871 1699,8776 1770,8783 1707,8782 1695,8814 1662,12752 1595,12761 1380,12713 1399,12868 1386,13032 1391,13144 1370,13155 1354,13195 1332,13196 1350,13195 1354,13195 1376,13148 1408,13144 1389,12964 1399,12868 1380,12713 1595,12761 1653,12752 1687,8871 1627,8866 1626,8879
+19|50|26,39,54,40,40,39,40,40,32,32,35,54,55,55,35,54,55,55,55,55,55,55,54,32,32,60,56,57,55,54,55,54,65,68,85,84,85,84,85,86,86,85,62,40,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,40,40,41,85,86,86,85,85,80,82,65,65,64,66,67,32,55,55,25,25|1321,6060 1308,6059 1321,5995 1233,5958 1195,6116 1183,6244 1157,6253 1149,6271 1110,6633 1050,6625 1042,6642 1026,6892 1058,6987 1189,7184 1218,7313 1311,7332 1315,7401 1293,7483 1252,7526 1175,7505 1145,7622 1156,7717 1199,7846 1292,7864 1242,8035 1282,8188 1304,8208 1368,8217 1388,8238 1383,8690 1421,8749 1504,8812 1691,8797 1695,8814 1655,13240 1654,14706 2697,16629 2978,16883 3628,17431 4202,17946 4263,18021 4311,18148 4476,19032 4492,19170 4489,19332 4606,19321 4704,19335 4759,19351 4763,19377 4796,19375 4800,19244 4803,19375 4763,19377 4759,19351 4704,19335 4595,19322 4621,19166 4592,19048 4592,18938 4629,18882 4596,18838 4593,18764 4529,18761 4459,18728 4418,18725 4311,18148 4263,18021 4202,17946 2973,16890 2689,16632 1646,14710 1665,10645 1708,6846 1706,6722 1694,6705 1705,6694 1710,6625 1716,6088 1474,6076 1426,6054 1421,6068 1321,6060
+20|12,35|42,55,36,65,64,65,52,40,40,40,40,40,40,40,40,40,40,55,55,65,55,32,32,32,34,55,55,55,65,65,24,65,15,15,15,15,15,14,15,15,15,25,25,60,61,56,56,55,56,55,55,55,55,55,55,53,32,32|104,9001 -45,9540 -215,9520 -235,10228 -1706,10203 -1832,10172 -1970,10119 -2119,10087 -2394,10045 -2754,10043 -2781,10032 -2778,9947 -2762,9883 -2738,9767 -2733,9517 -2715,9420 -2680,9314 -2518,9017 -2356,9030 -1730,8669 -1687,8383 -179,8044 -172,7799 22,7811 62,7785 198,7797 272,7761 849,7794 1699,7924 1702,7490 2382,7601 2391,7435 3054,7709 3045,7740 2959,7717 2947,7779 2945,7789 2922,7828 2925,7839 3008,7864 3004,7875 2774,7805 2793,7740 2393,7624 2381,7609 1318,7435 1265,7520 1239,7525 1179,7503 1154,7556 1145,7602 1154,7707 1199,7846 914,7799 272,7761 258,7993 263,8248 248,8436 104,9001`;
+const PLACES={kepatihan:["Kompleks Kepatihan",-7.7905,110.3665,1],dinkes:["Kantor Dinas Kesehatan",-7.7838,110.3889,1],dpu:["Kantor Dinas PU",-7.7868,110.3607,1],bpbd:["Kantor BPBD",-7.7990,110.3900,1],balaikota:["Balai Kota Yogyakarta",-7.8007,110.3920,1],sardjito:["RSUP Dr. Sardjito",-7.7684,110.3735,1],ugm:["Kampus UGM",-7.7705,110.3778,1],rsud:["RSUD Kota Yogyakarta",-7.8257,110.3832,1],kotagede:["Kemantren Kotagede",-7.8270,110.3990,1],bantul:["Kantor Pemkab Bantul",-7.8879,110.3291,1],sleman:["Kantor Pemkab Sleman",-7.7155,110.3555,1],bandara:["Bandara Adisutjipto",-7.7881,110.4317,1],giwangan:["Terminal Giwangan",-7.8335,110.3925,1],prambanan:["Kawasan Prambanan",-7.7520,110.4915,1],stasiun:["Stasiun Tugu",-7.7894,110.3632,1],bethesda:["RS Bethesda",-7.7836,110.3780,1],parangtritis:["Pantai Parangtritis",-8.0247,110.3292,0],amplaz:["Ambarrukmo Plaza",-7.7827,110.4015,0],alkid:["Alun-alun Kidul",-7.8118,110.3632,0],jcm:["Jogja City Mall",-7.7531,110.3615,0]};
+/* minutes parked at places that are not on the official list */
+const OFF_DWELL={amplaz:47,parangtritis:96,alkid:38,jcm:52};
+const LANDMARKS=[["Tugu",-7.7829,110.3671],["Malioboro",-7.7925,110.3658],["Kraton",-7.8053,110.3642],["Ring Road Utara",-7.7598,110.4010],["Ring Road Selatan",-7.8382,110.3610]];
+const KEYS=[["kepatihan","sleman","kepatihan"],["dinkes","sardjito","ugm","dinkes"],["dinkes","amplaz","bandara","dinkes"],["dpu","bantul","dpu"],["bpbd","prambanan","bpbd"],["balaikota","giwangan","kotagede","balaikota"],["kepatihan","bandara","kepatihan"],["dinkes","rsud","dinkes"],["dpu","parangtritis","dpu"],["bpbd","sleman","jcm","bpbd"],["balaikota","stasiun","balaikota"],["kepatihan","ugm","bethesda","kepatihan"],["dinkes","kotagede","giwangan","dinkes"],["dpu","sardjito","dpu"],["bpbd","bantul","bpbd"],["balaikota","alkid","rsud","balaikota"],["kepatihan","giwangan","kepatihan"],["dinkes","bandara","dinkes"],["dpu","prambanan","dpu"],["bpbd","kotagede","ugm","bpbd"]];
+const AGENCY={kepatihan:"Setda",balaikota:"Setda",dinkes:"Dinas Kesehatan",dpu:"Dinas PU",bpbd:"BPBD"};
+const MODELS={"Toyota Innova":{kml:10,cap:70},"Toyota Avanza":{kml:12,cap:70},"Mitsubishi L300":{kml:8,cap:60},"Honda Vario 125":{kml:45,cap:55}};
+const VEH=[["AB 1012 XY","Toyota Innova","Budi Santoso"],["AB 1047 GK","Toyota Avanza","Siti Rahmawati"],["AB 1083 FD","Toyota Innova","Agus Prasetyo"],["AB 1126 UV","Mitsubishi L300","Dwi Nugroho"],["AB 1159 XY","Toyota Innova","Rina Wulandari"],["AB 1194 GK","Honda Vario 125","Eko Saputra"],["AB 1238 FD","Toyota Innova","Wahyu Hidayat"],["AB 1271 UV","Honda Vario 125","Nur Aini"],["AB 1305 XY","Toyota Avanza","Joko Susilo"],["AB 1342 GK","Toyota Avanza","Bayu Kurniawan"],["AB 1376 FD","Honda Vario 125","Rizky Ramadhan"],["AB 1419 UV","Toyota Innova","Sri Lestari"],["AB 1453 XY","Toyota Avanza","Hendra Wijaya"],["AB 1487 GK","Mitsubishi L300","Yusuf Maulana"],["AB 1520 FD","Toyota Innova","Dewi Anggraini"],["AB 1564 UV","Toyota Avanza","Fajar Nugraha"],["AB 1598 XY","Honda Vario 125","Indah Permata"],["AB 1631 GK","Toyota Innova","Ahmad Fauzi"],["AB 1675 FD","Mitsubishi L300","Teguh Wibowo"],["AB 1709 UV","Toyota Avanza","Ratna Sari"]];
+
+const $=s=>document.querySelector(s);
+const NS="http://www.w3.org/2000/svg";
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function hav(a,b){const R=6371000,r=Math.PI/180,dl=(b[0]-a[0])*r,dn=(b[1]-a[1])*r;const x=Math.sin(dl/2)**2+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
+const fmt1=n=>n.toLocaleString("id-ID",{minimumFractionDigits:1,maximumFractionDigits:1});
+const hhmm=m=>{m=Math.round(m);const h=Math.floor(m/60)%24,mm=m%60;return String(h).padStart(2,"0")+":"+String(mm).padStart(2,"0")};
+const durTxt=s=>{const m=Math.round(s/60);return m<60?m+" mnt":Math.floor(m/60)+" j "+String(m%60).padStart(2,"0")+" mnt"};
+
+/* ---------- build trips from the road data ---------- */
+const TRIPS=RAW.trim().split("\n").map((ln,k)=>{
+  const [,w,s,c]=ln.split("|");
+  const pts=c.split(" ").map(q=>{const [a,b]=q.split(",").map(Number);return [a/1e5-7.8,b/1e5+110.3]});
+  const way=w.split(",").map(Number), osrm=s.split(",").map(Number);
+  const keys=KEYS[k], [plate,model,driver]=VEH[k], M=MODELS[model], rnd=rng(k*977+13);
+  const stopAt=new Map(way.map((pi,j)=>[pi,keys[j+1]]));
+  const startMin=7*60+((k*23)%110);
+  const K=[{t:0,i:0,d:0,v:0}], stops=[];
+  let t=0,d=0,moveT=0,vmax=0,vmaxI=0;
+  for(let j=0;j<pts.length-1;j++){
+    const seg=hav(pts[j],pts[j+1]);
+    const v=Math.min(M.cap,Math.max(12,osrm[j]*0.7))*(0.88+rnd()*0.24);
+    const dt=seg/(v/3.6);
+    t+=dt;d+=seg;moveT+=dt;
+    if(v>vmax&&seg>150){vmax=v;vmaxI=j}
+    K.push({t,i:j+1,d,v});
+    if(stopAt.has(j+1)){
+      const key=stopAt.get(j+1), official=!!PLACES[key][3];
+      const dw=(official?14+Math.floor(rnd()*28):OFF_DWELL[key])*60;
+      stops.push({key,i:j+1,arr:t,dep:t+dw,d,official});
+      t+=dw;K.push({t,i:j+1,d,v:0});
+    }
+  }
+  const off=stops.filter(s=>!s.official);
+  return {k,plate,model,driver,agency:AGENCY[keys[0]],keys,pts,K,stops,off,T:t,dist:d,moveT,vmax,vmaxI,startMin,fuel:d/1000/M.kml};
+});
+
+/* ---------- state ---------- */
+let cur=0,t=0,playing=false,rate=90,last=0,proj=null;
+const svg=$("#track"),prof=$("#prof");
+
+/* ---------- projection: tilt the route onto a stage like a race-track graphic ---------- */
+function makeProj(trip,W,H){
+  const lat0=trip.pts.reduce((a,p)=>a+p[0],0)/trip.pts.length,lng0=trip.pts.reduce((a,p)=>a+p[1],0)/trip.pts.length;
+  const kx=111320*Math.cos(lat0*Math.PI/180),ky=110574;
+  const flat=p=>[(p[1]-lng0)*kx,-(p[0]-lat0)*ky];
+  const m=trip.pts.map(flat);
+  let sxx=0,syy=0,sxy=0;m.forEach(([x,y])=>{sxx+=x*x;syy+=y*y;sxy+=x*y});
+  let ang=0.5*Math.atan2(2*sxy,sxx-syy);
+  const rot=([x,y],a)=>[x*Math.cos(a)+y*Math.sin(a),-x*Math.sin(a)+y*Math.cos(a)];
+  if(rot(m[0],ang)[0]>0)ang+=Math.PI; /* keep the start on the left */
+  const R=m.map(p=>rot(p,ang));
+  const ext=Math.max(...R.map(([x,z])=>Math.max(Math.abs(x),Math.abs(z))))||1;
+  const T=58*Math.PI/180,D=ext*3.4;
+  const persp=([x,z])=>{const p=D/(D-z*Math.sin(T));return [x*p,z*Math.cos(T)*p]};
+  const P=R.map(persp);
+  const xs=P.map(p=>p[0]),ys=P.map(p=>p[1]);
+  const minx=Math.min(...xs),maxx=Math.max(...xs),miny=Math.min(...ys),maxy=Math.max(...ys);
+  const narrow=W<800, boxW=narrow?W-70:W-150, boxH=narrow?H*0.42:H*0.46, cx=W/2, cy=narrow?H*0.6:H*0.6;
+  const s=Math.min(boxW/((maxx-minx)||1),boxH/((maxy-miny)||1));
+  /* flat routes get their depth stretched (up to 3.5x) so the track keeps some shape */
+  const sy=s*Math.min(3.5,Math.max(1,(boxH*0.55)/(((maxy-miny)||1)*s)));
+  const ox=cx-(minx+maxx)/2*s, oy=cy-(miny+maxy)/2*sy;
+  const f=ll=>{const q=persp(rot(flat(ll),ang));return [ox+q[0]*s,oy+q[1]*sy]};
+  /* direction of north on screen */
+  const a=f([lat0,lng0]),b=f([lat0+0.01,lng0]);
+  return {f,pts:trip.pts.map(f),north:Math.atan2(b[1]-a[1],b[0]-a[0])};
+}
+const dpath=ps=>"M"+ps.map(p=>p[0].toFixed(1)+" "+p[1].toFixed(1)).join("L");
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+
+function drawTrack(){
+  const trip=TRIPS[cur];
+  const narrow=svg.clientWidth<700;
+  const W=narrow?600:1000,H=narrow?470:540;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  proj=makeProj(trip,W,H);
+  const P=proj.pts, d=dpath(P), EXT=narrow?12:16, RW=narrow?7:8;
+  let h=`<defs>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>
+    <radialGradient id="floor" cx="50%" cy="60%" r="55%"><stop offset="0" stop-color="#16b8a6" stop-opacity=".13"/><stop offset="1" stop-color="#16b8a6" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="${W/2}" cy="${H*0.62}" rx="${W*0.48}" ry="${H*0.26}" fill="url(#floor)"/>`;
+  /* landmarks on the ground plane */
+  LANDMARKS.forEach(([n,la,ln])=>{const [x,y]=proj.f([la,ln]);if(x>20&&x<W-60&&y>H*0.22&&y<H-24)h+=`<g opacity=".55"><circle cx="${x}" cy="${y}" r="2.2" fill="#8fa3bf"/><text x="${x+7}" y="${y+4}" font-size="${narrow?13:11}" fill="#8fa3bf" letter-spacing="1.5" font-family="Inter Tight,Arial,sans-serif">${n.toUpperCase()}</text></g>`});
+  /* glow pool under the track, extruded walls, top surface */
+  h+=`<path d="${d}" transform="translate(0 ${EXT+6})" fill="none" stroke="#16b8a6" stroke-opacity=".35" stroke-width="${RW+16}" stroke-linejoin="round" stroke-linecap="round" filter="url(#soft)"/>`;
+  for(let k=EXT;k>=1;k-=1.5){const a=k/EXT;const c=`rgb(${Math.round(9+14*(1-a))},${Math.round(52+70*(1-a))},${Math.round(50+64*(1-a))})`;h+=`<path d="${d}" transform="translate(0 ${k.toFixed(1)})" fill="none" stroke="${c}" stroke-width="${RW+2}" stroke-linejoin="round" stroke-linecap="round"/>`}
+  h+=`<path d="${d}" fill="none" stroke="#16b8a6" stroke-width="${RW+2.6}" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)"/>`;
+  h+=`<path d="${d}" fill="none" stroke="#0a2a2c" stroke-width="${RW-1.4}" stroke-linejoin="round" stroke-linecap="round"/>`;
+  h+=`<path id="prog" d="" fill="none" stroke="#7ff3e4" stroke-width="${RW-1.4}" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)"/>`;
+  /* km markers */
+  const step=trip.dist>30000?10000:5000;let next=step;
+  for(let j=1;j<trip.K.length;j++){const a=trip.K[j-1],b=trip.K[j];if(b.i===a.i)continue;while(b.d>=next&&next<trip.dist-1500){const fr=(next-a.d)/(b.d-a.d||1);const x=P[a.i][0]+(P[b.i][0]-P[a.i][0])*fr,y=P[a.i][1]+(P[b.i][1]-P[a.i][1])*fr;h+=`<g opacity=".8"><line x1="${x}" y1="${y}" x2="${x}" y2="${y-16}" stroke="#16b8a6" stroke-width="1"/><text x="${x}" y="${y-20}" text-anchor="middle" font-size="${narrow?14:11}" fill="#16b8a6" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="600">${next/1000} KM</text></g>`;next+=step}}
+  /* pins */
+  const pin=(x,y,L,num,name,col,anchorLeft)=>{L=Math.min(L,y-26);const tx=anchorLeft?x-8:x+8,an=anchorLeft?"end":"start";return `<g><line x1="${x}" y1="${y}" x2="${x}" y2="${y-L}" stroke="${col}" stroke-width="1.2"/><circle cx="${x}" cy="${y}" r="3.6" fill="${col}"/><circle cx="${x}" cy="${y-L}" r="2" fill="${col}"/><text x="${tx}" y="${y-L+6}" text-anchor="${an}" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="${narrow?24:21}" fill="${col}">${num}</text>${narrow?"":`<text x="${tx}" y="${y-L+22}" text-anchor="${an}" font-size="11.5" fill="#e8eef7" font-family="Inter Tight,Arial,sans-serif">${esc(name)}</text>`}</g>`};
+  const s0=P[0];
+  h+=pin(s0[0],s0[1],58,"MULAI",PLACES[trip.keys[0]][0],"#e8eef7",s0[0]>W-200);
+  const Ls=[96,72,118,84];
+  trip.stops.forEach((s,n)=>{const [x,y]=P[s.i];const col=s.official?"#16b8a6":"#f26363";h+=pin(x,y,Ls[n%4],String(n+1).padStart(2,"0")+(s.official?"":" !"),PLACES[s.key][0],col,x>W-200)});
+  const mx=P[trip.vmaxI],my=P[trip.vmaxI+1],vx=(mx[0]+my[0])/2,vy=(mx[1]+my[1])/2;
+  h+=`<g><line x1="${vx}" y1="${vy}" x2="${vx}" y2="${vy-38}" stroke="#3b82f6" stroke-width="1"/><circle cx="${vx}" cy="${vy}" r="3" fill="#3b82f6"/><text x="${vx+6}" y="${vy-30}" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="600" font-size="${narrow?15:12}" fill="#3b82f6">MAKS ${Math.round(trip.vmax)} KM/J</text></g>`;
+  /* compass */
+  const cx=W-34,cy=H-34,na=proj.north;
+  h+=`<g opacity=".8"><circle cx="${cx}" cy="${cy}" r="17" fill="none" stroke="rgba(232,238,247,.25)"/><path d="M${cx+Math.cos(na)*13} ${cy+Math.sin(na)*13}L${cx+Math.cos(na+2.6)*7} ${cy+Math.sin(na+2.6)*7}L${cx+Math.cos(na-2.6)*7} ${cy+Math.sin(na-2.6)*7}Z" fill="#16b8a6"/><text x="${cx+Math.cos(na)*27}" y="${cy+Math.sin(na)*27+4}" text-anchor="middle" font-size="11" fill="#8fa3bf" font-family="Inter Tight,Arial,sans-serif" font-weight="700">U</text></g>`;
+  /* the vehicle */
+  h+=`<g id="car"><circle class="halo" r="8" fill="none" stroke="#7ff3e4" stroke-width="2"/><circle r="9" fill="#16b8a6" fill-opacity=".35"/><circle r="5" fill="#fff"/></g>`;
+  svg.innerHTML=h;
+  svg.setAttribute("aria-label",`Rute ${trip.plate}: ${trip.keys.map(k=>PLACES[k][0]).join(" ke ")}, ${fmt1(trip.dist/1000)} km`);
+}
+
+/* ---------- speed profile (Strava-style, x = time) ---------- */
+let PW=0,PH=104,vscale=60;
+function drawProfile(){
+  const trip=TRIPS[cur];
+  PW=Math.max(280,prof.clientWidth);prof.setAttribute("viewBox",`0 0 ${PW} ${PH}`);
+  const L=30,Rr=8,top=20,bot=PH-20;
+  const X=tt=>L+tt/trip.T*(PW-L-Rr), Y=v=>bot-v/vscale*(bot-top);
+  vscale=Math.max(40,Math.ceil(trip.vmax/20)*20);
+  /* smoothed speed for drawing */
+  const K=trip.K,ser=[[0,0]];
+  for(let n=1;n<K.length;n++){
+    if(K[n].i===K[n-1].i){ser.push([K[n-1].t,0],[K[n].t,0]);continue}
+    let sw=0,sv=0;for(let m=Math.max(1,n-3);m<=Math.min(K.length-1,n+3);m++){if(K[m].i===K[m-1].i)continue;const w=K[m].t-K[m-1].t;sw+=w;sv+=w*K[m].v}
+    ser.push([(K[n-1].t+K[n].t)/2,sv/sw]);
+  }
+  ser.push([trip.T,0]);
+  let h=`<defs><linearGradient id="pf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16b8a6" stop-opacity=".55"/><stop offset="1" stop-color="#16b8a6" stop-opacity=".02"/></linearGradient></defs>`;
+  for(let v=20;v<=vscale;v+=20)h+=`<line x1="${L}" x2="${PW-Rr}" y1="${Y(v)}" y2="${Y(v)}" stroke="rgba(232,238,247,.08)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-size="10" fill="#8fa3bf">${v}</text>`;
+  trip.stops.forEach((s,n)=>{const c=s.official?"#16b8a6":"#f26363";h+=`<rect x="${X(s.arr)}" y="${top}" width="${Math.max(2,X(s.dep)-X(s.arr))}" height="${bot-top}" fill="${c}" fill-opacity="${s.official?.08:.18}"/><text x="${X(s.arr)+4}" y="${top+12}" font-size="11" font-weight="700" fill="${c}" font-family="Barlow Condensed,Arial Narrow,sans-serif">${String(n+1).padStart(2,"0")}</text>`});
+  const line=ser.map(([a,b])=>`${X(a).toFixed(1)} ${Y(b).toFixed(1)}`).join("L");
+  h+=`<path d="M${line}L${X(trip.T)} ${bot}L${X(0)} ${bot}Z" fill="url(#pf)"/><path d="M${line}" fill="none" stroke="#16b8a6" stroke-width="1.6" stroke-linejoin="round"/>`;
+  h+=`<line x1="${L}" x2="${PW-Rr}" y1="${bot}" y2="${bot}" stroke="rgba(232,238,247,.2)"/>`;
+  const tick=trip.T>5400?1800:900;
+  for(let s=0;s<=trip.T;s+=tick)h+=`<text x="${X(s)}" y="${PH-4}" text-anchor="${s===0?"start":"middle"}" font-size="10" fill="#8fa3bf">${hhmm(trip.startMin+s/60)}</text>`;
+  h+=`<text x="2" y="9" font-size="9" fill="#8fa3bf" letter-spacing="1">KM/J</text>`;
+  h+=`<line id="cur" y1="${top-2}" y2="${bot}" stroke="#e8eef7" stroke-width="1.2"/><circle id="curDot" r="4" fill="#fff" stroke="#16b8a6" stroke-width="2"/>`;
+  prof.innerHTML=h;
+  prof._X=X;prof._Y=Y;prof._L=L;prof._R=Rr;
+}
+
+/* ---------- position at time t ---------- */
+function stateAt(trip,tt){
+  const K=trip.K;let n=1;while(n<K.length-1&&K[n].t<tt)n++;
+  const a=K[n-1],b=K[n];
+  if(a.i===b.i||tt>=trip.T){const i=tt>=trip.T?K[K.length-1].i:a.i;return {i,f:0,seg:n,v:0,d:a.d,parked:a.i===b.i&&tt<trip.T}}
+  const f=Math.min(1,Math.max(0,(tt-a.t)/(b.t-a.t)));
+  return {i:a.i,j:b.i,f,seg:n,v:b.v,d:a.d+(b.d-a.d)*f,parked:false};
+}
+function update(){
+  const trip=TRIPS[cur],P=proj.pts,st=stateAt(trip,t);
+  let x,y;
+  if(st.j!==undefined){x=P[st.i][0]+(P[st.j][0]-P[st.i][0])*st.f;y=P[st.i][1]+(P[st.j][1]-P[st.i][1])*st.f}else{[x,y]=P[st.i]}
+  $("#car").setAttribute("transform",`translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+  const upto=st.j!==undefined?st.i:st.i;
+  const ps=P.slice(0,upto+1);if(st.j!==undefined)ps.push([x,y]);
+  $("#prog").setAttribute("d",ps.length>1?dpath(ps):"");
+  $("#rClock").textContent=hhmm(trip.startMin+t/60);
+  $("#rSpeed").textContent=Math.round(st.v)+" km/j";
+  $("#rDist").textContent=fmt1(st.d/1000)+" km";
+  const stop=trip.stops.find(s=>t>=s.arr&&t<s.dep);
+  $("#rState").textContent=t>=trip.T?"Tiba":stop?(stop.official?"Berhenti":"Non-resmi"):t===0?"Siap":"Bergerak";
+  $("#rState").style.color=stop&&!stop.official?"var(--alert)":"";
+  const X=prof._X;if(X){const cx=X(t);$("#cur").setAttribute("x1",cx);$("#cur").setAttribute("x2",cx);$("#curDot").setAttribute("cx",cx);$("#curDot").setAttribute("cy",prof._Y(st.v))}
+  document.querySelectorAll("#sched li").forEach(li=>{const a=+li.dataset.a,b=+li.dataset.b;li.classList.toggle("now",t>=a&&t<=b&&!(a===0&&t===0&&b===0));li.classList.toggle("todo",t<a)});
+}
+
+/* ---------- panels ---------- */
+function fill(){
+  const trip=TRIPS[cur];
+  $("#plate").textContent=trip.plate;$("#agency").textContent=trip.agency;
+  const now=new Date(),day=now.toLocaleDateString("id-ID",{day:"numeric",timeZone:"Asia/Jakarta"}),mon=now.toLocaleDateString("id-ID",{month:"short",timeZone:"Asia/Jakarta"}).replace(".","").toUpperCase();
+  $("#sDate").innerHTML=`${day}<small>${mon}</small>`;
+  $("#sDist").innerHTML=`${fmt1(trip.dist/1000)}<small>KM</small>`;
+  $("#sMove").innerHTML=`${Math.round(trip.moveT/60)}<small>MNT</small>`;
+  $("#sAvg").innerHTML=`${Math.round(trip.dist/trip.moveT*3.6)}<small>KM/J</small>`;
+  $("#sStops").textContent=String(trip.stops.length).padStart(2,"0");
+  $("#vName").textContent=trip.model;
+  $("#vMeta").textContent=`${trip.driver} · ${trip.agency}`;
+  if(trip.off.length){const s=trip.off[0];$("#flagText").innerHTML=`<span><b>Perlu ditinjau.</b> Berhenti ${Math.round((s.dep-s.arr)/60)} menit di ${esc(PLACES[s.key][0])}, di luar daftar lokasi resmi.</span>`;$("#flag").classList.add("on")}else $("#flag").classList.remove("on");
+  let li=`<li data-a="0" data-b="0"><span class="n">—</span><span class="p">${esc(PLACES[trip.keys[0]][0])}<em>Berangkat</em></span><span class="t">${hhmm(trip.startMin)}</span></li>`;
+  trip.stops.forEach((s,n)=>{li+=`<li class="${s.official?"":"off"}" data-a="${s.arr}" data-b="${s.dep}"><span class="n">${String(n+1).padStart(2,"0")}</span><span class="p">${esc(PLACES[s.key][0])}<em>${s.official?"Lokasi resmi":"Lokasi non-resmi"} · ${Math.round((s.dep-s.arr)/60)} mnt</em></span><span class="t">${hhmm(trip.startMin+s.arr/60)}</span></li>`});
+  li+=`<li data-a="${trip.T}" data-b="${trip.T}"><span class="n">—</span><span class="p">${esc(PLACES[trip.keys[trip.keys.length-1]][0])}<em>Tiba · total ${durTxt(trip.T)}</em></span><span class="t">${hhmm(trip.startMin+trip.T/60)}</span></li>`;
+  $("#sched").innerHTML=li;
+  $("#fuel").textContent=`Perkiraan BBM terpakai ${fmt1(trip.fuel)} L (${MODELS[trip.model].kml} km/L untuk ${trip.model}).`;
+  document.querySelectorAll("#rows tr").forEach(r=>r.classList.toggle("active",+r.dataset.k===cur));
+}
+function select(k,autoplay=true){
+  cur=(k+TRIPS.length)%TRIPS.length;t=0;
+  fill();drawTrack();drawProfile();update();
+  setPlaying(autoplay&&!reduce);
+}
+function setPlaying(p){
+  playing=p;if(playing&&t>=TRIPS[cur].T)t=0;
+  $("#playIcon").innerHTML=playing?'<path d="M7 4h4v16H7zM13 4h4v16h-4z" fill="currentColor"/>':'<path d="M7 4l13 8-13 8z" fill="currentColor"/>';
+  $("#play").setAttribute("aria-label",playing?"Jeda":"Putar ulang");
+  last=performance.now();
+}
+function loop(now){
+  if(playing){t+=(now-last)/1000*rate;if(t>=TRIPS[cur].T){t=TRIPS[cur].T;setPlaying(false)}update()}
+  last=now;requestAnimationFrame(loop);
+}
+
+/* ---------- table ---------- */
+function table(){
+  let h="",km=0,off=0;
+  TRIPS.forEach(tr=>{km+=tr.dist;off+=tr.off.length;
+    const route=tr.keys.slice(1,-1).map(k=>PLACES[k][0]).join(", ");
+    h+=`<tr data-k="${tr.k}" tabindex="0"><td class="num">${String(tr.k+1).padStart(2,"0")}</td><td><b>${tr.plate}</b><div class="sub">${tr.model}</div></td><td>${tr.agency}</td><td>${esc(route)}<div class="sub">dari ${esc(PLACES[tr.keys[0]][0])}</div></td><td class="num">${hhmm(tr.startMin)}</td><td class="num">${fmt1(tr.dist/1000)} km</td><td class="num">${durTxt(tr.T)}</td><td>${tr.off.length?`<span class="st off">Henti non-resmi</span>`:`<span class="st">Sesuai rute</span>`}</td></tr>`});
+  $("#rows").innerHTML=h;
+  $("#tKm").textContent=Math.round(km/1000).toLocaleString("id-ID")+" km";
+  $("#tOff").textContent=off;
+  $("#rows").addEventListener("click",e=>{const r=e.target.closest("tr");if(r){select(+r.dataset.k);document.getElementById("card").scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})}});
+  $("#rows").addEventListener("keydown",e=>{if(e.key==="Enter"){const r=e.target.closest("tr");if(r)select(+r.dataset.k)}});
+}
+
+/* ---------- controls ---------- */
+$("#play").onclick=()=>setPlaying(!playing);
+document.querySelectorAll(".rate").forEach(b=>b.onclick=()=>{rate=+b.dataset.r;document.querySelectorAll(".rate").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+$("#prev").onclick=()=>select(cur-1);$("#next").onclick=()=>select(cur+1);
+let drag=false;
+const seek=e=>{const r=prof.getBoundingClientRect();const x=(e.clientX-r.left)/r.width*PW;t=Math.max(0,Math.min(TRIPS[cur].T,(x-prof._L)/(PW-prof._L-prof._R)*TRIPS[cur].T));update()};
+prof.addEventListener("pointerdown",e=>{drag=true;prof.setPointerCapture(e.pointerId);setPlaying(false);seek(e)});
+prof.addEventListener("pointermove",e=>{if(drag)seek(e)});
+prof.addEventListener("pointerup",()=>drag=false);
+document.addEventListener("keydown",e=>{if(e.target.closest("input,textarea,tr"))return;if(e.key==="ArrowRight")select(cur+1);if(e.key==="ArrowLeft")select(cur-1);if(e.key===" "&&e.target===document.body){e.preventDefault();setPlaying(!playing)}});
+let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{drawTrack();drawProfile();update()},120)});
+
+table();
+select(15,true);
+window.__sel=k=>select(k,false);
+requestAnimationFrame(loop);
+</script>
