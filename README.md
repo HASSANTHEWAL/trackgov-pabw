@@ -21,6 +21,7 @@ index.html          landing page (made by our classmates)
 css/style.css       landing page styles and the project's colors
 css/track.css       styles for the 3D trip track
 js/main.js          landing page animations
+js/simulation.js    turns each route into a timed trip (used by every page)
 js/track.js         the 3D trip track (trip replay)
 js/data/            all dummy data: places, vehicles, road routes
 assets/img/         photos and logo
