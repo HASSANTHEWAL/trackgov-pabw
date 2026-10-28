@@ -226,14 +226,14 @@
               <div class="ci">Fuel <b>71%</b></div>
             </div>
             <div class="chip" style="--k: 14; right: 5%; top: 50%">
-              <div class="ci">Alerts <b>0</b></div>
+              <div class="ci">Alerts <b id="hero-alerts-chip">0</b></div>
             </div>
             <span class="hudl">Simulated telemetry · demonstration</span>
           </div>
           <div class="stats">
-            <div><b class="cnt" data-to="248">0</b><span>Vehicles</span></div>
-            <div><b class="cnt" data-to="187">0</b><span>Active</span></div>
-            <div><b class="cnt" data-to="5">0</b><span>Alerts</span></div>
+            <div><b class="cnt" id="hero-vehicles" data-to="0">0</b><span>Vehicles</span></div>
+            <div><b class="cnt" id="hero-active" data-to="0">0</b><span>Active</span></div>
+            <div><b class="cnt" id="hero-alerts" data-to="0">0</b><span>Alerts</span></div>
             <i class="demo">Demo data</i>
           </div>
           <div class="wrap">
@@ -290,9 +290,9 @@
               <p>One map for the whole fleet, once the tracking backend is connected.</p>
             </article>
             <article class="pn" data-n="02">
-              <span class="no">02 — Fleet</span>
-              <h3>Know every<br />asset.</h3>
-              <p>Status, assignments and readiness for each vehicle in one record.</p>
+              <span class="no">02 — Refuels</span>
+              <h3>Log every<br />refuel.</h3>
+              <p>Liters, price, odometer and a receipt photo for every refuel.</p>
             </article>
             <article class="pn" data-n="03">
               <span class="no">03 — Fuel</span>
@@ -331,19 +331,19 @@
           </div>
           <div class="cards">
             <div class="card rv">
-              <div class="n">248</div>
+              <div class="n" id="fleet-vehicles">–</div>
               <p>Registered vehicles</p>
             </div>
             <div class="card rv" style="--d: 0.1s">
-              <div class="n teal">187</div>
+              <div class="n teal" id="fleet-active">–</div>
               <p>Active now</p>
             </div>
             <div class="card rv" style="--d: 0.2s">
-              <div class="n">64</div>
+              <div class="n" id="fleet-trips">–</div>
               <p>Trips today</p>
             </div>
             <div class="card rv" style="--d: 0.3s">
-              <div class="n">5</div>
+              <div class="n" id="fleet-alerts">–</div>
               <p>Open alerts</p>
             </div>
           </div>
@@ -557,7 +557,7 @@
           <div class="grid2">
             <div class="panel chart rv">
               <h3>Fuel monitoring</h3>
-              <p>Litres per day, last 7 days</p>
+              <p>Fuel use per day, last 7 days (% of the busiest day)</p>
               <div
                 class="bars"
                 role="img"
@@ -685,5 +685,6 @@
     <script src="js/data/routes.js"></script>
     <script src="js/simulation.js"></script>
     <script src="js/track.js"></script>
+    <script src="js/landing.js"></script>
   </body>
 </html>
