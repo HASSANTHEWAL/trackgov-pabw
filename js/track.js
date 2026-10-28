@@ -3,6 +3,7 @@
 // It draws one vehicle's route as a glowing, tilted 3D track with numbered stop pins,
 // a speed chart under it, and plays the trip back like a video.
 // The trips themselves come from js/simulation.js (TRIPS, getTripState, getStopAt).
+// Text helpers like formatClock come from js/format.js.
 // Every id and class starts with "tg-" so nothing clashes with the landing page's code.
 
 // ---------- settings and current state ----------
@@ -29,38 +30,8 @@ const PROFILE_BOTTOM = PROFILE_HEIGHT - 20; // room for the clock times
 let profileWidth = 0;
 let profileMaxSpeed = 60; // the km/h at the top of the chart
 
-// ---------- small text helpers ----------
-
-// 12.345 -> "12.3"
-function formatOneDecimal(number) {
-  return number.toLocaleString("en-GB", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-}
-
-// 7 -> "07"
-function twoDigits(number) {
-  return String(number).padStart(2, "0");
-}
-
-// Minutes after midnight -> "HH:MM"
-function formatClock(minutes) {
-  const roundedMinutes = Math.round(minutes);
-  const hours = Math.floor(roundedMinutes / 60) % 24;
-  return twoDigits(hours) + ":" + twoDigits(roundedMinutes % 60);
-}
-
-// Seconds -> "45 min" or "1 h 05 min"
-function formatDuration(seconds) {
-  const minutes = Math.round(seconds / 60);
-  if (minutes < 60) {
-    return minutes + " min";
-  }
-  return Math.floor(minutes / 60) + " h " + twoDigits(minutes % 60) + " min";
-}
-
-// Place names go inside HTML, so "&" and "<" must not be read as HTML code.
-function escapeHtml(text) {
-  return String(text).replaceAll("&", "&amp;").replaceAll("<", "&lt;");
-}
+// ---------- small helpers ----------
+// (formatClock, formatOneDecimal, twoDigits, formatDuration and escapeHtml are in js/format.js)
 
 // A list of [x, y] points -> the "d" text of an SVG path line ("M x y L x y L ...").
 function svgPath(points) {
