@@ -8,6 +8,9 @@
 // Trips start at 07:00 or a little later (counted in minutes after midnight).
 const DAY_START_MINUTE = 7 * 60;
 
+// Business rule 4: parking longer than this at a non-official place creates an alert.
+const ALERT_PARK_MINUTES = 30;
+
 // Makes a random number generator that always gives the same numbers for the same seed.
 // We use it instead of Math.random() so the demo looks the same every time the page loads.
 // This is the well-known "Mulberry32" generator: the bit operations only mix the number up.
@@ -196,4 +199,58 @@ function getTripLatLng(trip, time) {
 // The stop the car is parked at, at a moment of the trip, or undefined if it is not stopped.
 function getStopAt(trip, time) {
   return trip.stops.find((stop) => time >= stop.arriveTime && time < stop.leaveTime);
+}
+
+// True if this stop breaks business rule 4 (too long at a non-official place).
+function isAlertStop(stop) {
+  const parkedMinutes = (stop.leaveTime - stop.arriveTime) / 60;
+  return !stop.official && parkedMinutes > ALERT_PARK_MINUTES;
+}
+
+// All stops of today that create an alert, from every trip.
+function getAlertStops() {
+  let alertStops = [];
+  TRIPS.forEach(function (trip) {
+    alertStops = alertStops.concat(trip.stops.filter(isAlertStop));
+  });
+  return alertStops;
+}
+
+// ---------- the demo clock ----------
+// The simulated trips only happen in the morning (from 07:00 until the last car is back).
+// So that the expo always has cars on the road, the demo uses the real time when it falls
+// inside those busy hours, and otherwise loops through the busy hours again and again.
+
+// The first start and the last arrival of the day, in minutes after midnight.
+function getBusyHours() {
+  let firstStart = TRIPS[0].startMinute;
+  let lastArrival = 0;
+  TRIPS.forEach(function (trip) {
+    firstStart = Math.min(firstStart, trip.startMinute);
+    lastArrival = Math.max(lastArrival, trip.startMinute + trip.totalTime / 60);
+  });
+  return { firstStart: firstStart, lastArrival: lastArrival };
+}
+
+// The demo time right now, in minutes after midnight (with seconds as a decimal part).
+function getDemoMinute() {
+  const now = new Date();
+  const realMinute = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+  const busyHours = getBusyHours();
+  if (realMinute >= busyHours.firstStart && realMinute <= busyHours.lastArrival) {
+    return realMinute;
+  }
+  const busyLength = busyHours.lastArrival - busyHours.firstStart;
+  return busyHours.firstStart + (realMinute % busyLength);
+}
+
+// Seconds since this trip started, at a demo time. Below 0 means the car has not left yet.
+function getTripTimeAt(trip, demoMinute) {
+  return (demoMinute - trip.startMinute) * 60;
+}
+
+// True if the car is out on its trip (driving or parked at a stop) at a demo time.
+function isOnTheRoad(trip, demoMinute) {
+  const time = getTripTimeAt(trip, demoMinute);
+  return time > 0 && time < trip.totalTime;
 }
