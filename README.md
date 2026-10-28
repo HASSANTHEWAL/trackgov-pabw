@@ -4,6 +4,8 @@ Government vehicle and fuel monitoring website. Group project for Pengembangan A
 
 All data on the site is dummy data for the expo. The road routes are real (OpenStreetMap); trip times and stops are simulated.
 
+The project is for Gunungkidul Regency. For the expo, the demo uses roads in Yogyakarta city.
+
 ## How to run
 
 No install and no build step.
