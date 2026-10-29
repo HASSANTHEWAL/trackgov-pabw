@@ -6,6 +6,7 @@
 // The names under which we save each list in localStorage.
 const STORAGE_KEYS = {
   refuels: "trackgov.refuels",
+  role: "trackgov.role",
 };
 
 // Reads a saved list. Returns an empty list if nothing is saved yet,
@@ -29,6 +30,36 @@ function writeList(key, list) {
     return true;
   } catch (error) {
     return false;
+  }
+}
+
+// ---------- the logged-in role (demo login, no passwords) ----------
+
+// "admin", "supervisor", or "" when nobody is logged in.
+function getCurrentRole() {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.role) || "";
+  } catch (error) {
+    return "";
+  }
+}
+
+// Remembers the role chosen on the login page. Returns false if it could not be saved.
+function saveCurrentRole(role) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.role, role);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+// Logs out.
+function clearCurrentRole() {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.role);
+  } catch (error) {
+    // Nothing to do: if storage is blocked, nobody was saved as logged in.
   }
 }
 
