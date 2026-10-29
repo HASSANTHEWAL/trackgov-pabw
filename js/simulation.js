@@ -312,3 +312,30 @@ function getVehicleStatus(trip, time) {
   }
   return "parked";
 }
+
+// ---------- counting statuses (used by the dashboard and the public portal) ----------
+
+// The status of every car at a demo time, in the same order as TRIPS.
+function getAllStatuses(demoMinute) {
+  return TRIPS.map((trip) => getVehicleStatus(trip, getTripTimeAt(trip, demoMinute)));
+}
+
+// How many cars have each status, like { moving: 5, parked: 3, offline: 12, alert: 0 }.
+function countStatuses(statuses) {
+  const counts = { moving: 0, parked: 0, offline: 0, alert: 0 };
+  statuses.forEach((status) => counts[status]++);
+  return counts;
+}
+
+// ---------- agencies ----------
+
+// The agencies in the order they first appear in VEHICLES.
+function getAgencies() {
+  const agencies = [];
+  VEHICLES.forEach(function (vehicle) {
+    if (!agencies.includes(vehicle.agency)) {
+      agencies.push(vehicle.agency);
+    }
+  });
+  return agencies;
+}

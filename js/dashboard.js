@@ -28,20 +28,6 @@ function fillGreeting() {
   document.querySelector("#greeting").textContent = greeting;
 }
 
-// ---------- counting ----------
-
-// The status of every car at a demo time, in the same order as TRIPS.
-function getAllStatuses(demoMinute) {
-  return TRIPS.map((trip) => getVehicleStatus(trip, getTripTimeAt(trip, demoMinute)));
-}
-
-// How many cars have each status, like { moving: 5, parked: 3, offline: 12, alert: 0 }.
-function countStatuses(statuses) {
-  const counts = { moving: 0, parked: 0, offline: 0, alert: 0 };
-  statuses.forEach((status) => counts[status]++);
-  return counts;
-}
-
 // ---------- stat cards ----------
 
 function buildCard(label, value, note, extraClass) {
@@ -131,33 +117,7 @@ function renderAlerts() {
   document.querySelector("#alert-count").textContent = `${alerts.length} today`;
 }
 
-// ---------- fuel per agency ----------
-
-// The agencies in the order they first appear in VEHICLES.
-function getAgencies() {
-  const agencies = [];
-  VEHICLES.forEach(function (vehicle) {
-    if (!agencies.includes(vehicle.agency)) {
-      agencies.push(vehicle.agency);
-    }
-  });
-  return agencies;
-}
-
-// Expected and bought liters added up for each agency.
-function getFuelPerAgency(report) {
-  return getAgencies().map(function (agency) {
-    let expectedLiters = 0;
-    let boughtLiters = 0;
-    report.forEach(function (row) {
-      if (row.agency === agency) {
-        expectedLiters += row.expectedLiters;
-        boughtLiters += row.boughtLiters;
-      }
-    });
-    return { agency: agency, expectedLiters: expectedLiters, boughtLiters: boughtLiters };
-  });
-}
+// ---------- fuel per agency (getFuelPerAgency is in js/fuel-data.js) ----------
 
 // One bar: a colored part as wide as this value compared with the biggest value.
 function buildBar(liters, biggestLiters, colorClass) {
