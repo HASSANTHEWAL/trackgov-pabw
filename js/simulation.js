@@ -219,6 +219,12 @@ function getAlertStops() {
   return alertStops;
 }
 
+// A name for one alert that stays the same every time the page loads,
+// like "AB 1083 FD @ amplaz". Used to save "Mark reviewed" and "Dismiss".
+function getAlertId(trip, stop) {
+  return trip.plate + " @ " + stop.placeKey;
+}
+
 // The clock time (minutes after midnight) when an alert starts: once the car has been
 // parked for ALERT_PARK_MINUTES at the non-official place.
 function getAlertStartMinute(trip, stop) {

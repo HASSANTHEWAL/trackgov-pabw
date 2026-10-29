@@ -7,6 +7,7 @@
 const STORAGE_KEYS = {
   refuels: "trackgov.refuels",
   role: "trackgov.role",
+  alertDecisions: "trackgov.alertDecisions",
 };
 
 // Reads a saved list. Returns an empty list if nothing is saved yet,
@@ -61,6 +62,32 @@ function clearCurrentRole() {
   } catch (error) {
     // Nothing to do: if storage is blocked, nobody was saved as logged in.
   }
+}
+
+// ---------- alert decisions (Mark reviewed / Dismiss) ----------
+
+// All saved decisions as a list of { alertId, decision, decidedBy, decidedAt }.
+// decision is "reviewed" or "dismissed". An alert without a decision is "new".
+function getAlertDecisions() {
+  return readList(STORAGE_KEYS.alertDecisions);
+}
+
+// The saved decision for one alert, or undefined if it is still new.
+function getAlertDecision(alertId) {
+  return getAlertDecisions().find((item) => item.alertId === alertId);
+}
+
+// Saves a decision for one alert (replacing an older one). Returns false if it could not be saved.
+function saveAlertDecision(alertId, decision, decidedBy) {
+  const decisions = getAlertDecisions().filter((item) => item.alertId !== alertId);
+  decisions.push({ alertId: alertId, decision: decision, decidedBy: decidedBy, decidedAt: new Date().toISOString() });
+  return writeList(STORAGE_KEYS.alertDecisions, decisions);
+}
+
+// Removes the decision, so the alert is new again.
+function deleteAlertDecision(alertId) {
+  const decisions = getAlertDecisions().filter((item) => item.alertId !== alertId);
+  writeList(STORAGE_KEYS.alertDecisions, decisions);
 }
 
 // ---------- refuels ----------
