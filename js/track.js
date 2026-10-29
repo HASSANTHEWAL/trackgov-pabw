@@ -642,6 +642,8 @@ function selectTrip(tripIndex, autoplay) {
   drawProfile();
   updateReplay();
   setPlaying(autoplay && !reduceMotion);
+  // Tell other code on the page (like the trip list in js/trips.js) that the trip changed.
+  document.dispatchEvent(new CustomEvent("tg-trip-change"));
 }
 
 // Starts or pauses the replay, and switches the button between play and pause icons.

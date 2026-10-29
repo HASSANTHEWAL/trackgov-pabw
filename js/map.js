@@ -229,33 +229,52 @@ function setUpFilters() {
 
 // ---------- the details card ----------
 
-// Fills the card of the chosen car (or hides it when no car is chosen).
-function updateVehicleInfo() {
+// Builds the card of the chosen car (or hides it when no car is chosen).
+// The card is built once per car. updateVehicleInfo() then only changes the values that move,
+// so the buttons and the link keep working and keep keyboard focus between updates.
+function buildVehicleInfo() {
   const card = document.querySelector("#vehicle-info");
   if (selectedTripIndex === -1) {
     card.hidden = true;
     return;
   }
   const trip = TRIPS[selectedTripIndex];
-  const snapshot = snapshots[selectedTripIndex];
   card.innerHTML = `
     <div class="info-top">
       <div><strong>${trip.plate}</strong><span>${escapeHtml(trip.model)}</span></div>
-      <span class="status-pill status-${snapshot.status}">${STATUS_LABELS[snapshot.status]}</span>
+      <span class="status-pill" id="info-status"></span>
       <button class="info-close" id="info-close" aria-label="Close details">×</button>
     </div>
-    <p class="info-where">${escapeHtml(snapshot.where)}</p>
+    <p class="info-where" id="info-where"></p>
     <dl class="info-details">
       <div><dt>Agency</dt><dd>${escapeHtml(trip.agency)}</dd></div>
       <div><dt>Driver</dt><dd>${escapeHtml(trip.driver)}</dd></div>
-      <div><dt>Speed</dt><dd>${Math.round(snapshot.speed)} km/h</dd></div>
-      <div><dt>Last update</dt><dd>${formatClockWithSeconds(lastUpdateMinute)}</dd></div>
-      <div><dt>Driven today</dt><dd>${formatOneDecimal(snapshot.distanceKm)} km</dd></div>
-      <div><dt>Fuel used today</dt><dd>${formatOneDecimal(snapshot.fuelLiters)} L</dd></div>
+      <div><dt>Speed</dt><dd id="info-speed"></dd></div>
+      <div><dt>Last update</dt><dd id="info-updated"></dd></div>
+      <div><dt>Driven today</dt><dd id="info-distance"></dd></div>
+      <div><dt>Fuel used today</dt><dd id="info-fuel"></dd></div>
     </dl>
-    <p class="info-note">Fuel is estimated from the distance (${MODELS[trip.model].kmPerLiter} km/L for this model).</p>`;
+    <p class="info-note">Fuel is estimated from the distance (${MODELS[trip.model].kmPerLiter} km/L for this model).</p>
+    <a class="info-link" href="trips.html?plate=${encodeURIComponent(trip.plate)}">View today's trip →</a>`;
   card.hidden = false;
   document.querySelector("#info-close").addEventListener("click", () => selectVehicle(-1));
+  updateVehicleInfo();
+}
+
+// Puts the latest status, place, speed, time, distance and fuel into the card.
+function updateVehicleInfo() {
+  if (selectedTripIndex === -1) {
+    return;
+  }
+  const snapshot = snapshots[selectedTripIndex];
+  const statusPill = document.querySelector("#info-status");
+  statusPill.className = "status-pill status-" + snapshot.status;
+  statusPill.textContent = STATUS_LABELS[snapshot.status];
+  document.querySelector("#info-where").textContent = snapshot.where;
+  document.querySelector("#info-speed").textContent = Math.round(snapshot.speed) + " km/h";
+  document.querySelector("#info-updated").textContent = formatClockWithSeconds(lastUpdateMinute);
+  document.querySelector("#info-distance").textContent = formatOneDecimal(snapshot.distanceKm) + " km";
+  document.querySelector("#info-fuel").textContent = formatOneDecimal(snapshot.fuelLiters) + " L";
 }
 
 // Chooses a car (or no car, with -1): highlights it, shows its route and details,
@@ -265,7 +284,7 @@ function selectVehicle(tripIndex) {
   showSelectedRoute();
   updateMarkers();
   updateVehicleList();
-  updateVehicleInfo();
+  buildVehicleInfo();
   if (tripIndex !== -1) {
     liveMap.panTo(snapshots[tripIndex].latLng);
   }
