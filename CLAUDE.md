@@ -130,6 +130,7 @@ After each task: test on desktop and phone width (Chrome DevTools), check the co
 - Everything shown is labeled as demo or simulated data.
 - **Jogja, not Gunungkidul, for the demo** (decided 29 Oct 2026). The project is for Gunungkidul Regency, but the expo demo keeps the Jogja routes. The README says so.
 - **App pages are in English** (decided 29 Oct 2026), like the landing page.
+- **Added official locations count for the alert rule** (decided 29 Oct 2026). A stop inside the circle of a location an Admin added on `locations.html` is official on every app page (`applyOfficialLocations()` in `js/simulation.js`, called by `js/common.js`). The landing page does not load saved data, so it always shows the original numbers.
 - **Demo clock:** `getDemoMinute()` in `js/simulation.js`. It uses the real time during the trip hours (07:00 to about 11:20) and loops through them otherwise, so cars are always on the road.
 
 ## Open questions (ask the user before the related task)

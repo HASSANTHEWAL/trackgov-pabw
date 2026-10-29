@@ -201,6 +201,31 @@ function getStopAt(trip, time) {
   return trip.stops.find((stop) => time >= stop.arriveTime && time < stop.leaveTime);
 }
 
+// ---------- official locations added by an Admin ----------
+// The places in places.js are official or not by their "official" field.
+// An Admin can also add official locations (a point and a radius) on locations.html.
+// A stop inside one of those circles counts as official too, so it no longer creates an alert.
+
+// How big the circle around each official place from places.js is drawn on the map, in meters.
+const OFFICIAL_RADIUS_METERS = 150;
+
+// True if a [lat, lng] point is inside the circle of one of the added locations.
+function isInsideAddedLocation(point, addedLocations) {
+  return addedLocations.some((location) => distanceMeters(point, [location.lat, location.lng]) <= location.radiusMeters);
+}
+
+// Checks again, for every stop of every trip, whether it is at an official location.
+// common.js calls this when an app page opens, with the locations saved by storage.js.
+function applyOfficialLocations(addedLocations) {
+  TRIPS.forEach(function (trip) {
+    trip.stops.forEach(function (stop) {
+      const stopPoint = trip.points[stop.pointIndex];
+      stop.official = PLACES[stop.placeKey].official || isInsideAddedLocation(stopPoint, addedLocations);
+    });
+    trip.unofficialStops = trip.stops.filter((stop) => !stop.official);
+  });
+}
+
 // True if this stop breaks business rule 4 (too long at a non-official place).
 function isAlertStop(stop) {
   const parkedMinutes = (stop.leaveTime - stop.arriveTime) / 60;

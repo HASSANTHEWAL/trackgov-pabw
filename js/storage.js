@@ -8,6 +8,7 @@ const STORAGE_KEYS = {
   refuels: "trackgov.refuels",
   role: "trackgov.role",
   alertDecisions: "trackgov.alertDecisions",
+  locations: "trackgov.officialLocations",
 };
 
 // Reads a saved list. Returns an empty list if nothing is saved yet,
@@ -88,6 +89,27 @@ function saveAlertDecision(alertId, decision, decidedBy) {
 function deleteAlertDecision(alertId) {
   const decisions = getAlertDecisions().filter((item) => item.alertId !== alertId);
   writeList(STORAGE_KEYS.alertDecisions, decisions);
+}
+
+// ---------- official locations added by an Admin ----------
+
+// All added locations: { id, name, lat, lng, radiusMeters, addedBy, addedAt }.
+function getSavedLocations() {
+  return readList(STORAGE_KEYS.locations);
+}
+
+// Adds one official location. Returns false if it could not be saved.
+function saveLocation(location) {
+  const locations = getSavedLocations();
+  location.id = Date.now();
+  locations.push(location);
+  return writeList(STORAGE_KEYS.locations, locations);
+}
+
+// Removes an added location by its id.
+function deleteSavedLocation(id) {
+  const locations = getSavedLocations().filter((location) => location.id !== id);
+  writeList(STORAGE_KEYS.locations, locations);
 }
 
 // ---------- refuels ----------

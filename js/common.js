@@ -23,7 +23,7 @@ const NAV_ITEMS = [
   { href: "fuel.html", label: "Fuel report", shortLabel: "Fuel", ready: true, onPhone: true, adminOnly: false },
   { href: "alerts.html", label: "Alerts", shortLabel: "Alerts", ready: true, onPhone: true, adminOnly: false },
   { href: "vehicles.html", label: "Vehicles", shortLabel: "Vehicles", ready: false, onPhone: false, adminOnly: false },
-  { href: "locations.html", label: "Official locations", shortLabel: "Places", ready: false, onPhone: false, adminOnly: true },
+  { href: "locations.html", label: "Official locations", shortLabel: "Places", ready: true, onPhone: false, adminOnly: true },
 ];
 
 // ---------- who is logged in ----------
@@ -162,6 +162,10 @@ const STATUS_COLORS = { moving: "#16b8a6", parked: "#f5a524", offline: "#6b7a90"
 const STATUS_LABELS = { moving: "Moving", parked: "Parked", offline: "Offline", alert: "Alert" };
 
 // ---------- start ----------
+
+// Official locations added by an Admin change which stops are official (and so the alerts).
+// This runs before the page's own script, so every page uses the same answer.
+applyOfficialLocations(getSavedLocations());
 
 // Only app pages get the menus. The login page also loads this file (for ROLES and NAV_ITEMS),
 // but has no sidebar, so nothing happens there.
