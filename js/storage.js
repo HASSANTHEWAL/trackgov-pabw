@@ -9,6 +9,7 @@ const STORAGE_KEYS = {
   role: "trackgov.role",
   alertDecisions: "trackgov.alertDecisions",
   locations: "trackgov.officialLocations",
+  vehicles: "trackgov.vehicles",
 };
 
 // Reads a saved list. Returns an empty list if nothing is saved yet,
@@ -110,6 +111,28 @@ function saveLocation(location) {
 function deleteSavedLocation(id) {
   const locations = getSavedLocations().filter((location) => location.id !== id);
   writeList(STORAGE_KEYS.locations, locations);
+}
+
+// ---------- vehicles added by an Admin ----------
+
+// All added vehicles: { id, plate, model, agency, driver, addedAt }.
+// They have no GPS trip yet, so only the vehicles page shows them.
+function getSavedVehicles() {
+  return readList(STORAGE_KEYS.vehicles);
+}
+
+// Adds one vehicle. Returns false if it could not be saved.
+function saveVehicle(vehicle) {
+  const vehicles = getSavedVehicles();
+  vehicle.id = Date.now();
+  vehicles.push(vehicle);
+  return writeList(STORAGE_KEYS.vehicles, vehicles);
+}
+
+// Removes an added vehicle by its id.
+function deleteSavedVehicle(id) {
+  const vehicles = getSavedVehicles().filter((vehicle) => vehicle.id !== id);
+  writeList(STORAGE_KEYS.vehicles, vehicles);
 }
 
 // ---------- refuels ----------

@@ -27,6 +27,8 @@ fuel.html           daily fuel report and refuel form
 trips.html          trip history: 3D trip replay and today's trips
 alerts.html         alerts for long stops at non-official places
 locations.html      official locations: map circles and add form (Admin only)
+vehicles.html       all vehicles with filters, Add vehicle for Admin
+public.html         public portal: no login, no driver names
 css/style.css       landing page styles and the project's colors
 css/track.css       styles for the 3D trip track
 css/app.css         layout of the app pages (sidebar, bottom menu, status colors)
@@ -37,6 +39,8 @@ css/dashboard.css   styles for the dashboard
 css/login.css       styles for the login page
 css/alerts.css      styles for the alerts page
 css/locations.css   styles for the official locations page
+css/vehicles.css    styles for the vehicles page
+css/public.css      styles for the public portal
 js/main.js          landing page animations
 js/simulation.js    turns each route into a timed trip (used by every page)
 js/format.js        small text helpers (clock times, numbers)
@@ -44,6 +48,8 @@ js/common.js        menu of the app pages, login check and roles
 js/login.js         the login page
 js/alerts.js        the alerts page
 js/locations.js     the official locations page
+js/vehicles.js      the vehicles page
+js/public.js        the public portal
 js/landing.js       calculated numbers on the landing page
 js/map.js           the live map page
 js/fuel-data.js     fuel report calculations (used by the fuel page and the dashboard)
