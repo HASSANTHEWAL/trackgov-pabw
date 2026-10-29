@@ -128,13 +128,14 @@ After each task: test on desktop and phone width (Chrome DevTools), check the co
 - The trip history uses an **F1-race-track style** (glowing 3D line, numbered stop pins, big stats) in the landing page's navy and teal colors, not neon yellow.
 - 4 of the 20 dummy trips are planted to trigger the unofficial-stop rule: Ambarrukmo Plaza, Pantai Parangtritis, Jogja City Mall and Alun-alun Kidul.
 - Everything shown is labeled as demo or simulated data.
+- **Jogja, not Gunungkidul, for the demo** (decided 29 Oct 2026). The project is for Gunungkidul Regency, but the expo demo keeps the Jogja routes. The README says so.
+- **App pages are in English** (decided 29 Oct 2026), like the landing page.
+- **Demo clock:** `getDemoMinute()` in `js/simulation.js`. It uses the real time during the trip hours (07:00 to about 11:20) and loops through them otherwise, so cars are always on the road.
 
 ## Open questions (ask the user before the related task)
 
-1. **Gunungkidul or Jogja?** The project charter and worksheet are about **Gunungkidul Regency** (Wonosari), but the demo uses Jogja city. Either the written documents say "demo uses Yogyakarta city for the expo", or new routes are needed for Wonosari. Ask before building more map pages.
-2. **Language.** The landing page is in English. The Figma prototype and worksheet are in Bahasa Indonesia. Ask which language the app pages use, then use it everywhere.
-3. **Backend.** Which language and database the course uses after P14 (for example PHP + MySQL). Until then, keep `js/storage.js` as the only place that saves data.
-4. **Team.** The charter lists 5 members, but one is not enrolled in PABW (assumed: Razzan Chesta Ugama, network and server role). Confirm before writing names in the README or on pages.
+1. **Backend.** Which language and database the course uses after P14 (for example PHP + MySQL). Until then, keep `js/storage.js` as the only place that saves data.
+2. **Team.** The charter lists 5 members, but one is not enrolled in PABW (assumed: Razzan Chesta Ugama, network and server role). Confirm before writing names in the README or on pages.
 
 ## Credits that must stay visible
 - Map and route data: "© OpenStreetMap contributors", routes computed with OSRM.
