@@ -98,7 +98,7 @@ The visual layout of the app pages comes from the Figma prototype in `reference/
 | `alerts.html` | Alerts | Calculated from the simulation (Rule 4). Tabs New / Reviewed / All. "Mark reviewed" and "Dismiss" saved in `localStorage`. |
 | `locations.html` | Official locations (Admin only) | Leaflet circles for official places, form to add one. |
 | `vehicles.html` | Vehicles | Table with filters by agency and status. "Add vehicle" for Admin. |
-| `public.html` | Public portal | Fleet stats, status map **without driver names**, monthly fuel spend. |
+| `public.html` | Public portal | Fleet stats, status map **without driver names**, today's fuel spend per agency (decided 29 Oct 2026: only one day of data, so not monthly yet). |
 
 Shared files to create: `css/app.css` (sidebar layout for the app pages, desktop sidebar, bottom nav on mobile), `js/common.js` (navigation, current role, hide Admin-only links for other roles), `js/simulation.js` (turns a route into a timed trip: position at any time, stops, speed; used by the map, trips, fuel and alert pages), `js/storage.js` (all `localStorage` reads and writes).
 

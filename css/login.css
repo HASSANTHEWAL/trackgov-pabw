@@ -170,9 +170,9 @@ body.login-page {
   margin: 0;
 }
 
-.login-public .nav-link {
-  padding-left: 0;
-  padding-right: 0;
+.login-public .text-link {
+  color: var(--teal);
+  font-weight: 600;
 }
 
 .login-back {
