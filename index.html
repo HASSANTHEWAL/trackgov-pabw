@@ -220,10 +220,10 @@
               </circle>
             </svg>
             <div class="chip" style="--k: 26; right: 9%; top: 24%">
-              <div class="ci">VH-014 · En route · <b>62 km/h</b></div>
+              <div class="ci" id="hero-car-chip">Live tracking</div>
             </div>
             <div class="chip" style="--k: -18; right: 24%; top: 64%">
-              <div class="ci">Fuel <b>71%</b></div>
+              <div class="ci">Fuel <b id="hero-fuel-chip">0 L</b> today</div>
             </div>
             <div class="chip" style="--k: 14; right: 5%; top: 50%">
               <div class="ci">Alerts <b id="hero-alerts-chip">0</b></div>
@@ -557,27 +557,16 @@
           <div class="grid2">
             <div class="panel chart rv">
               <h3>Fuel monitoring</h3>
-              <p>Fuel use per day, last 7 days (% of the busiest day)</p>
-              <div
-                class="bars"
-                role="img"
-                aria-label="Demonstration bar chart of daily fuel use: Mon 62, Tue 71, Wed 58, Thu 80, Fri 74, Sat 40, Sun 33 percent of peak"
-              >
-                <div><i style="--h: 62%"></i>Mon</div>
-                <div><i style="--h: 71%"></i>Tue</div>
-                <div><i style="--h: 58%"></i>Wed</div>
-                <div><i style="--h: 80%"></i>Thu</div>
-                <div><i style="--h: 74%"></i>Fri</div>
-                <div><i style="--h: 40%"></i>Sat</div>
-                <div><i style="--h: 33%"></i>Sun</div>
-              </div>
+              <p>Fuel bought today, per agency (liters)</p>
+              <!-- Filled by js/landing.js -->
+              <div class="bars" id="fuel-bars" role="img" aria-label="Fuel bought today per agency"></div>
             </div>
             <div class="panel chart rv" style="--d: 0.15s">
               <h3>Trip history</h3>
-              <p>Recent trips (sample)</p>
+              <p>Latest trips today</p>
               <table>
                 <caption style="position: absolute; left: -9999px">
-                  Sample trip history
+                  Latest trips today
                 </caption>
                 <thead>
                   <tr>
@@ -586,42 +575,30 @@
                     <th>Status</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td>VH-014</td>
-                    <td>Tugu → UGM</td>
-                    <td class="tag">Completed</td>
-                  </tr>
-                  <tr>
-                    <td>VH-077</td>
-                    <td>Bantul → Kotagede</td>
-                    <td class="tag">Completed</td>
-                  </tr>
-                  <tr>
-                    <td>VH-102</td>
-                    <td>Sleman → Malioboro</td>
-                    <td class="warn">Delayed</td>
-                  </tr>
-                </tbody>
+                <!-- Filled by js/landing.js -->
+                <tbody id="recent-trips"></tbody>
               </table>
             </div>
             <div class="panel chart rv" style="--d: 0.3s">
               <h3>Reports &amp; analytics</h3>
-              <p>Utilisation this month (sample)</p>
+              <p id="fuel-check-text">Fuel check today: cars whose fuel matches their distance</p>
               <div
                 class="n teal"
+                id="fuel-check-percent"
                 style="font-size: 3.4rem; font-weight: 700; letter-spacing: -0.05em"
               >
-                78%
+                0%
               </div>
               <div
+                id="fuel-check-meter"
                 style="height: 8px; border-radius: 9px; background: var(--navy2); margin-top: 16px"
                 role="img"
-                aria-label="Demonstration utilisation 78 percent"
+                aria-label="Fuel check today"
               >
                 <div
+                  id="fuel-check-bar"
                   style="
-                    width: 78%;
+                    width: 0%;
                     height: 100%;
                     border-radius: 9px;
                     background: linear-gradient(90deg, var(--blue), var(--teal));
@@ -683,8 +660,10 @@
     <script src="js/data/places.js"></script>
     <script src="js/data/vehicles.js"></script>
     <script src="js/data/routes.js"></script>
+    <script src="js/data/refuels.js"></script>
     <script src="js/simulation.js"></script>
     <script src="js/format.js"></script>
+    <script src="js/fuel-data.js"></script>
     <script src="js/track.js"></script>
     <script src="js/landing.js"></script>
   </body>
