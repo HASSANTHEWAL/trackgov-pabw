@@ -21,18 +21,22 @@ Or, from this folder: `python -m http.server 8000`, then open http://localhost:8
 ```
 index.html          landing page (made by our classmates)
 map.html            live map of the 20 vehicles
+fuel.html           daily fuel report and refuel form
 css/style.css       landing page styles and the project's colors
 css/track.css       styles for the 3D trip track
 css/app.css         layout of the app pages (sidebar, bottom menu, status colors)
 css/map.css         styles for the live map page
+css/fuel.css        styles for the fuel report page
 js/main.js          landing page animations
 js/simulation.js    turns each route into a timed trip (used by every page)
 js/format.js        small text helpers (clock times, numbers)
 js/common.js        menu of the app pages
 js/landing.js       calculated numbers on the landing page
 js/map.js           the live map page
+js/fuel.js          the fuel report page
+js/storage.js       the only file that saves to localStorage (replace with fetch for the backend)
 js/track.js         the 3D trip track (trip replay)
-js/data/            all dummy data: places, vehicles, road routes
+js/data/            all dummy data: places, vehicles, road routes, refuels
 assets/img/         photos and logo
 assets/video/       hero video
 docs/               project charter, P14 worksheet, project brief, Figma brief

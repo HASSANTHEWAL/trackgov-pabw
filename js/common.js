@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { href: "dashboard.html", label: "Dashboard", shortLabel: "Home", ready: false, onPhone: true },
   { href: "map.html", label: "Live map", shortLabel: "Map", ready: true, onPhone: true },
   { href: "trips.html", label: "Trip history", shortLabel: "Trips", ready: false, onPhone: false },
-  { href: "fuel.html", label: "Fuel report", shortLabel: "Fuel", ready: false, onPhone: true },
+  { href: "fuel.html", label: "Fuel report", shortLabel: "Fuel", ready: true, onPhone: true },
   { href: "alerts.html", label: "Alerts", shortLabel: "Alerts", ready: false, onPhone: true },
   { href: "vehicles.html", label: "Vehicles", shortLabel: "Vehicles", ready: false, onPhone: false },
   { href: "locations.html", label: "Official locations", shortLabel: "Places", ready: false, onPhone: false },
