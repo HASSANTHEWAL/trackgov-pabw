@@ -20,6 +20,7 @@ Or, from this folder: `python -m http.server 8000`, then open http://localhost:8
 
 ```
 index.html          landing page (made by our classmates)
+login.html          demo login: choose Admin or Supervisor (no password)
 dashboard.html      summary of the fleet today
 map.html            live map of the 20 vehicles
 fuel.html           daily fuel report and refuel form
@@ -31,10 +32,12 @@ css/map.css         styles for the live map page
 css/fuel.css        styles for the fuel report page
 css/trips.css       styles for the trip history page
 css/dashboard.css   styles for the dashboard
+css/login.css       styles for the login page
 js/main.js          landing page animations
 js/simulation.js    turns each route into a timed trip (used by every page)
 js/format.js        small text helpers (clock times, numbers)
-js/common.js        menu of the app pages
+js/common.js        menu of the app pages, login check and roles
+js/login.js         the login page
 js/landing.js       calculated numbers on the landing page
 js/map.js           the live map page
 js/fuel-data.js     fuel report calculations (used by the fuel page and the dashboard)
