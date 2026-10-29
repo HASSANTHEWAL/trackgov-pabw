@@ -208,12 +208,21 @@ function isAlertStop(stop) {
 }
 
 // All stops of today that create an alert, from every trip.
+// Each item is { trip, stop } so we know which car it was.
 function getAlertStops() {
-  let alertStops = [];
+  const alertStops = [];
   TRIPS.forEach(function (trip) {
-    alertStops = alertStops.concat(trip.stops.filter(isAlertStop));
+    trip.stops.filter(isAlertStop).forEach(function (stop) {
+      alertStops.push({ trip: trip, stop: stop });
+    });
   });
   return alertStops;
+}
+
+// The clock time (minutes after midnight) when an alert starts: once the car has been
+// parked for ALERT_PARK_MINUTES at the non-official place.
+function getAlertStartMinute(trip, stop) {
+  return trip.startMinute + stop.arriveTime / 60 + ALERT_PARK_MINUTES;
 }
 
 // ---------- the demo clock ----------
@@ -253,4 +262,22 @@ function getTripTimeAt(trip, demoMinute) {
 function isOnTheRoad(trip, demoMinute) {
   const time = getTripTimeAt(trip, demoMinute);
   return time > 0 && time < trip.totalTime;
+}
+
+// The status of a car at a moment of its trip (time = seconds after the trip started):
+// moving, parked, offline (before or after its trip) or alert
+// (parked longer than the limit at a non-official place, business rule 4).
+function getVehicleStatus(trip, time) {
+  if (time <= 0 || time >= trip.totalTime) {
+    return "offline";
+  }
+  const stop = getStopAt(trip, time);
+  if (!stop) {
+    return "moving";
+  }
+  const parkedMinutes = (time - stop.arriveTime) / 60;
+  if (!stop.official && parkedMinutes > ALERT_PARK_MINUTES) {
+    return "alert";
+  }
+  return "parked";
 }

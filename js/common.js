@@ -8,7 +8,7 @@
 // shown greyed out with "Soon". Set it to true when the page is finished.
 // onPhone: true puts the page in the bottom menu on phones (there is room for 4).
 const NAV_ITEMS = [
-  { href: "dashboard.html", label: "Dashboard", shortLabel: "Home", ready: false, onPhone: true },
+  { href: "dashboard.html", label: "Dashboard", shortLabel: "Home", ready: true, onPhone: true },
   { href: "map.html", label: "Live map", shortLabel: "Map", ready: true, onPhone: true },
   { href: "trips.html", label: "Trip history", shortLabel: "Trips", ready: true, onPhone: false },
   { href: "fuel.html", label: "Fuel report", shortLabel: "Fuel", ready: true, onPhone: true },
@@ -65,6 +65,12 @@ function buildBottomNav() {
   });
   document.querySelector("#app-bottom-nav").innerHTML = links;
 }
+
+// ---------- status colors and names, used by the map and the dashboard ----------
+
+// Marker colors for each status (the same colors as css/app.css).
+const STATUS_COLORS = { moving: "#16b8a6", parked: "#f5a524", offline: "#6b7a90", alert: "#f26363" };
+const STATUS_LABELS = { moving: "Moving", parked: "Parked", offline: "Offline", alert: "Alert" };
 
 buildSidebar();
 buildBottomNav();
