@@ -86,3 +86,21 @@ function buildFuelReport(refuels) {
   });
   return report;
 }
+
+// ---------- fuel per agency (used by the dashboard and the public portal) ----------
+// (getAgencies is in js/simulation.js)
+
+// Expected and bought liters added up for each agency.
+function getFuelPerAgency(report) {
+  return getAgencies().map(function (agency) {
+    let expectedLiters = 0;
+    let boughtLiters = 0;
+    report.forEach(function (row) {
+      if (row.agency === agency) {
+        expectedLiters += row.expectedLiters;
+        boughtLiters += row.boughtLiters;
+      }
+    });
+    return { agency: agency, expectedLiters: expectedLiters, boughtLiters: boughtLiters };
+  });
+}

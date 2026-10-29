@@ -22,7 +22,7 @@ const NAV_ITEMS = [
   { href: "trips.html", label: "Trip history", shortLabel: "Trips", ready: true, onPhone: false, adminOnly: false },
   { href: "fuel.html", label: "Fuel report", shortLabel: "Fuel", ready: true, onPhone: true, adminOnly: false },
   { href: "alerts.html", label: "Alerts", shortLabel: "Alerts", ready: true, onPhone: true, adminOnly: false },
-  { href: "vehicles.html", label: "Vehicles", shortLabel: "Vehicles", ready: false, onPhone: false, adminOnly: false },
+  { href: "vehicles.html", label: "Vehicles", shortLabel: "Vehicles", ready: true, onPhone: false, adminOnly: false },
   { href: "locations.html", label: "Official locations", shortLabel: "Places", ready: true, onPhone: false, adminOnly: true },
 ];
 
@@ -112,7 +112,7 @@ function buildSidebar() {
   NAV_ITEMS.filter(canOpen).forEach(function (item) {
     links += buildNavLink(item, item.label);
   });
-  const publicLink = buildNavLink({ href: "public.html", ready: false }, "Public portal");
+  const publicLink = buildNavLink({ href: "public.html", ready: true }, "Public portal");
   document.querySelector("#app-sidebar").innerHTML = `
     <a class="side-logo" href="index.html"><img src="assets/img/logo-wordmark.png" alt="TrackGov" width="602" height="69" /></a>
     <nav class="side-nav" aria-label="App pages">
