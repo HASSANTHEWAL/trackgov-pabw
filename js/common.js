@@ -21,7 +21,7 @@ const NAV_ITEMS = [
   { href: "map.html", label: "Live map", shortLabel: "Map", ready: true, onPhone: true, adminOnly: false },
   { href: "trips.html", label: "Trip history", shortLabel: "Trips", ready: true, onPhone: false, adminOnly: false },
   { href: "fuel.html", label: "Fuel report", shortLabel: "Fuel", ready: true, onPhone: true, adminOnly: false },
-  { href: "alerts.html", label: "Alerts", shortLabel: "Alerts", ready: false, onPhone: true, adminOnly: false },
+  { href: "alerts.html", label: "Alerts", shortLabel: "Alerts", ready: true, onPhone: true, adminOnly: false },
   { href: "vehicles.html", label: "Vehicles", shortLabel: "Vehicles", ready: false, onPhone: false, adminOnly: false },
   { href: "locations.html", label: "Official locations", shortLabel: "Places", ready: false, onPhone: false, adminOnly: true },
 ];
@@ -62,13 +62,29 @@ function logOut() {
 
 // ---------- the menus ----------
 
+// How many of today's alerts nobody has reviewed or dismissed yet.
+function countNewAlerts() {
+  const newAlerts = getAlertStops().filter((alert) => !getAlertDecision(getAlertId(alert.trip, alert.stop)));
+  return newAlerts.length;
+}
+
+// Puts the number of new alerts on the Alerts links, and hides the red badge when there are none.
+// The alerts page calls this again after every Mark reviewed or Dismiss.
+function updateAlertBadges() {
+  const count = countNewAlerts();
+  document.querySelectorAll(".nav-badge").forEach(function (badge) {
+    badge.textContent = count;
+    badge.hidden = count === 0;
+  });
+}
+
 // One menu link. Pages that are not ready yet become plain text, not a link.
 function buildNavLink(item, labelText) {
   const isCurrent = document.body.dataset.page === item.href;
   let badge = "";
-  // The alerts link shows how many alerts there are today.
+  // The alerts link gets a red badge with the number of new alerts (filled by updateAlertBadges).
   if (item.href === "alerts.html") {
-    badge = `<b class="nav-badge">${getAlertStops().length}</b>`;
+    badge = `<b class="nav-badge"></b>`;
   }
   if (!item.ready) {
     return `<span class="nav-link is-soon">${labelText}<small>Soon</small></span>`;
@@ -154,4 +170,5 @@ if (document.body.classList.contains("app") && checkAccess()) {
   buildBottomNav();
   buildPhoneAccountBar();
   setUpLogOutButtons();
+  updateAlertBadges();
 }
