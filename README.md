@@ -25,6 +25,7 @@ dashboard.html      summary of the fleet today
 map.html            live map of the 20 vehicles
 fuel.html           daily fuel report and refuel form
 trips.html          trip history: 3D trip replay and today's trips
+alerts.html         alerts for long stops at non-official places
 css/style.css       landing page styles and the project's colors
 css/track.css       styles for the 3D trip track
 css/app.css         layout of the app pages (sidebar, bottom menu, status colors)
@@ -33,11 +34,13 @@ css/fuel.css        styles for the fuel report page
 css/trips.css       styles for the trip history page
 css/dashboard.css   styles for the dashboard
 css/login.css       styles for the login page
+css/alerts.css      styles for the alerts page
 js/main.js          landing page animations
 js/simulation.js    turns each route into a timed trip (used by every page)
 js/format.js        small text helpers (clock times, numbers)
 js/common.js        menu of the app pages, login check and roles
 js/login.js         the login page
+js/alerts.js        the alerts page
 js/landing.js       calculated numbers on the landing page
 js/map.js           the live map page
 js/fuel-data.js     fuel report calculations (used by the fuel page and the dashboard)
