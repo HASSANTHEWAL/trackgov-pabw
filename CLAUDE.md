@@ -91,7 +91,7 @@ The visual layout of the app pages comes from the Figma prototype in `reference/
 |---|---|---|
 | `index.html` | Landing page | Exists. "Live tracking" section already shows the 3D trip track. |
 | `login.html` | Login | Role picker (Admin / Supervisor) plus a link to the public page. Demo only: no real passwords. Save the role in `localStorage`. |
-| `dashboard.html` | Summary | Stat cards (vehicles, moving, parked, offline, alerts, fuel today), small map, latest alerts, 7-day fuel chart. |
+| `dashboard.html` | Summary | Stat cards (vehicles, moving, parked, offline, alerts, fuel today), small map, latest alerts, today's fuel per agency (decided 29 Oct 2026: there is only one day of data). |
 | `map.html` | Live map | Leaflet map of Jogja, the 20 cars moving along `ROUTES`, searchable list, click a car for plate, agency, driver, speed, last update, fuel. |
 | `trips.html` | Trip history | The 3D track replay (reuse `js/track.js` and `css/track.css`) plus the list of today's trips. |
 | `fuel.html` | Fuel report | Table per vehicle: liters bought, expected liters, km, km/L, mismatch % (red over 5%). Refuel form. Export to CSV. |

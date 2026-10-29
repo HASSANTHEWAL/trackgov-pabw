@@ -7,10 +7,6 @@
 // How often the positions update. The project goal is "at least every 30 seconds".
 const UPDATE_SECONDS = 5;
 
-// Marker colors for each status (the same colors as css/app.css).
-const STATUS_COLORS = { moving: "#16b8a6", parked: "#f5a524", offline: "#6b7a90", alert: "#f26363" };
-const STATUS_LABELS = { moving: "Moving", parked: "Parked", offline: "Offline", alert: "Alert" };
-
 let liveMap = null;
 const vehicleMarkers = []; // one Leaflet marker per trip, same order as TRIPS
 let snapshots = []; // the latest status of every car, same order as TRIPS
@@ -19,24 +15,7 @@ let selectedRouteLine = null; // the route of the chosen car, drawn on the map
 let activeFilter = "all";
 let lastUpdateMinute = 0;
 
-// ---------- working out each car's status ----------
-
-// moving, parked, offline (before or after its trip) or alert
-// (parked longer than the limit at a non-official place, business rule 4).
-function getVehicleStatus(trip, time) {
-  if (time <= 0 || time >= trip.totalTime) {
-    return "offline";
-  }
-  const stop = getStopAt(trip, time);
-  if (!stop) {
-    return "moving";
-  }
-  const parkedMinutes = (time - stop.arriveTime) / 60;
-  if (!stop.official && parkedMinutes > ALERT_PARK_MINUTES) {
-    return "alert";
-  }
-  return "parked";
-}
+// ---------- describing each car (getVehicleStatus is in js/simulation.js) ----------
 
 // The next place the car is driving to: its next stop, or its office at the end.
 function getNextPlaceName(trip, time) {
