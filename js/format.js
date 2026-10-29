@@ -7,6 +7,25 @@ function formatOneDecimal(number) {
   return number.toLocaleString("en-GB", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 
+// 2.5 -> "2.50"
+function formatTwoDecimals(number) {
+  return number.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// 21500 -> "IDR 21,500"
+function formatRupiah(amount) {
+  return "IDR " + Math.round(amount).toLocaleString("en-GB");
+}
+
+// 17.04 -> "+17.0%", -2.2 -> "−2.2%"
+function formatPercent(number) {
+  let sign = "+";
+  if (number < 0) {
+    sign = "−";
+  }
+  return sign + formatOneDecimal(Math.abs(number)) + "%";
+}
+
 // 7 -> "07"
 function twoDigits(number) {
   return String(number).padStart(2, "0");
